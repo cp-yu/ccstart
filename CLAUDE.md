@@ -36,6 +36,17 @@ ccstart CLI:
 - Fish: `ccstart completions fish > ~/.config/fish/completions/ccstart.fish`
 - PowerShell: `ccstart completions powershell | Out-File -Encoding utf8 -FilePath $PROFILE`
 
+## Release
+
+发布到 GitHub Release：
+- 创建版本标签并推送，例如：
+  - `git tag v0.1.0 && git push origin v0.1.0`
+- GitHub Actions 工作流 `.github/workflows/release.yml` 将为以下平台构建发布产物：
+  - Linux x86_64 (`ccstart-linux-x64`)
+  - Windows x86_64 (`ccstart-windows-x64.exe`)
+- 工作流会上传构建产物与对应的 `SHA256` 校验文件，并自动创建 Release（推送标签时触发）。
+- 也可通过 `Actions -> Release -> Run workflow` 手动触发（`workflow_dispatch`）。
+
 ## Code Style
 Rust 2024 edition: Follow standard conventions
 
