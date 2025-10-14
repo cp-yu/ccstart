@@ -1,0 +1,322 @@
+{
+  "version": 2,
+  "claude": {
+    "providers": {
+      "88code": {
+        "id": "88code",
+        "name": "88code",
+        "settingsConfig": {
+          "$schema": "https://json.schemastore.org/claude-code-settings.json",
+          "env": {
+            "ANTHROPIC_AUTH_TOKEN": "88_1d3b1531a689bceb",
+            "ANTHROPIC_BASE_URL": "https://www.88code.org/api",
+            "API_TIMEOUT_MS": "3000000",
+            "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+            "DISABLE_ERROR_REPORTING": "1",
+            "DISABLE_TELEMETRY": "1",
+            "MAX_THINKING_TOKENS": "32000"
+          },
+          "hooks": {},
+          "includeCoAuthoredBy": false,
+          "outputStyle": "default",
+          "permissions": {
+            "allow": [
+              "Bash(git:*)",
+              "LS",
+              "Read",
+              "Agent",
+              "Write",
+              "Edit",
+              "MultiEdit",
+              "Glob",
+              "Grep",
+              "WebFetch",
+              "WebSearch",
+              "TodoWrite",
+              "NotebookRead",
+              "NotebookEdit",
+              "mcp__ide",
+              "mcp__exa",
+              "mcp__context7",
+              "mcp__mcp-deepwiki",
+              "mcp__Playwright",
+              "mcp__spec-workflow",
+              "mcp__open-websearch"
+            ],
+            "ask": [
+              "Bash(git add:*)",
+              "Bash(git commit:*)",
+              "Bash(git push:*)",
+              "Bash(git pull:*)",
+              "Bash(git merge:*)",
+              "Bash(git rebase:*)",
+              "Bash(git reset:*)",
+              "Bash(git checkout:*)",
+              "Bash(git branch:*)",
+              "Bash(git clone:*)",
+              "Bash(git init:*)",
+              "Bash(git rm:*)",
+              "Bash(git mv:*)"
+            ],
+            "deny": []
+          },
+          "statusLine": {
+            "command": "echo \" API: $(echo ${ANTHROPIC_BASE_URL:-not set} | cut -d'/' -f3 | cut -d'.' -f2)| $(ccline) \"",
+            "padding": 0,
+            "type": "command"
+          }
+        }
+      },
+      "default": {
+        "id": "default",
+        "name": "default",
+        "settingsConfig": {
+          "$schema": "https://json.schemastore.org/claude-code-settings.json",
+          "alwaysThinkingEnabled": false,
+          "env": {
+            "ANTHROPIC_AUTH_TOKEN": "7fba12ae5p5xQrYmd4puay",
+            "ANTHROPIC_BASE_URL": "https://open.bigmodel.cn/api/anthropic",
+            "ANTHROPIC_MODEL": "glm-4.6",
+            "ANTHROPIC_SMALL_FAST_MODEL": "glm-4.6",
+            "API_TIMEOUT_MS": "3000000",
+            "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+            "DISABLE_ERROR_REPORTING": "1",
+            "DISABLE_TELEMETRY": "1",
+            "MAX_THINKING_TOKENS": "32000"
+          },
+          "hooks": {},
+          "includeCoAuthoredBy": false,
+          "model": "claude-sonnet-4-5-20250929",
+          "outputStyle": "default",
+          "permissions": {
+            "allow": [
+              "Bash(git:*)",
+              "LS",
+              "Read",
+              "Agent",
+              "Write",
+              "Edit",
+              "MultiEdit",
+              "Glob",
+              "Grep",
+              "WebFetch",
+              "WebSearch",
+              "TodoWrite",
+              "NotebookRead",
+              "NotebookEdit",
+              "mcp__ide",
+              "mcp__exa",
+              "mcp__context7",
+              "mcp__mcp-deepwiki",
+              "mcp__Playwright",
+              "mcp__spec-workflow",
+              "mcp__open-websearch"
+            ],
+            "ask": [
+              "Bash(git add:*)",
+              "Bash(git commit:*)",
+              "Bash(git push:*)",
+              "Bash(git pull:*)",
+              "Bash(git merge:*)",
+              "Bash(git rebase:*)",
+              "Bash(git reset:*)",
+              "Bash(git checkout:*)",
+              "Bash(git branch:*)",
+              "Bash(git clone:*)",
+              "Bash(git init:*)",
+              "Bash(git rm:*)",
+              "Bash(git mv:*)"
+            ],
+            "deny": []
+          },
+          "statusLine": {
+            "command": "echo \" API: $(echo ${ANTHROPIC_BASE_URL:-not set} | cut -d'/' -f3 | cut -d'.' -f2)| $(ccline) \"",
+            "padding": 0,
+            "type": "command"
+          }
+        },
+        "websiteUrl": ""
+      },
+      "packycode": {
+        "id": "packycode",
+        "name": "packycode",
+        "settingsConfig": {
+          "$schema": "https://json.schemastore.org/claude-code-settings.json",
+          "env": {
+            "ANTHROPIC_AUTH_TOKEN": "sk-N8EvxOJHjpgDJWIYfgD",
+            "ANTHROPIC_BASE_URL": "https://api-us-cn2.packycode.com",
+            "API_TIMEOUT_MS": "3000000",
+            "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+            "DISABLE_ERROR_REPORTING": "1",
+            "DISABLE_TELEMETRY": "1",
+            "MAX_THINKING_TOKENS": "32000"
+          },
+          "hooks": {},
+          "includeCoAuthoredBy": false,
+          "outputStyle": "default",
+          "permissions": {
+            "allow": [
+              "Bash(git:*)",
+              "LS",
+              "Read",
+              "Agent",
+              "Write",
+              "Edit",
+              "MultiEdit",
+              "Glob",
+              "Grep",
+              "WebFetch",
+              "WebSearch",
+              "TodoWrite",
+              "NotebookRead",
+              "NotebookEdit",
+              "mcp__ide",
+              "mcp__exa",
+              "mcp__context7",
+              "mcp__mcp-deepwiki",
+              "mcp__Playwright",
+              "mcp__spec-workflow",
+              "mcp__open-websearch"
+            ],
+            "ask": [
+              "Bash(git add:*)",
+              "Bash(git commit:*)",
+              "Bash(git push:*)",
+              "Bash(git pull:*)",
+              "Bash(git merge:*)",
+              "Bash(git rebase:*)",
+              "Bash(git reset:*)",
+              "Bash(git checkout:*)",
+              "Bash(git branch:*)",
+              "Bash(git clone:*)",
+              "Bash(git init:*)",
+              "Bash(git rm:*)",
+              "Bash(git mv:*)"
+            ],
+            "deny": []
+          },
+          "statusLine": {
+            "command": "echo \" API: $(echo ${ANTHROPIC_BASE_URL:-not set} | cut -d'/' -f3 | cut -d'.' -f2)| $(ccline) \"",
+            "padding": 0,
+            "type": "command"
+          }
+        }
+      },
+      "droid": {
+        "id": "droid",
+        "name": "droid",
+        "settingsConfig": {
+          "$schema": "https://json.schemastore.org/claude-code-settings.json",
+          "env": {
+            "ANTHROPIC_AUTH_TOKEN": "sk-TnXdqMdLOe9wjoA492",
+            "ANTHROPIC_BASE_URL": "https://www.maeaccx.com/proxy/123444",
+            "API_TIMEOUT_MS": "3000000",
+            "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+            "DISABLE_ERROR_REPORTING": "1",
+            "DISABLE_TELEMETRY": "1",
+            "MAX_THINKING_TOKENS": "32000"
+          },
+          "hooks": {},
+          "includeCoAuthoredBy": false,
+          "outputStyle": "default",
+          "permissions": {
+            "allow": [
+              "Bash(git:*)",
+              "LS",
+              "Read",
+              "Agent",
+              "Write",
+              "Edit",
+              "MultiEdit",
+              "Glob",
+              "Grep",
+              "WebFetch",
+              "WebSearch",
+              "TodoWrite",
+              "NotebookRead",
+              "NotebookEdit",
+              "mcp__ide",
+              "mcp__exa",
+              "mcp__context7",
+              "mcp__mcp-deepwiki",
+              "mcp__Playwright",
+              "mcp__spec-workflow",
+              "mcp__open-websearch"
+            ],
+            "ask": [
+              "Bash(git add:*)",
+              "Bash(git commit:*)",
+              "Bash(git push:*)",
+              "Bash(git pull:*)",
+              "Bash(git merge:*)",
+              "Bash(git rebase:*)",
+              "Bash(git reset:*)",
+              "Bash(git checkout:*)",
+              "Bash(git branch:*)",
+              "Bash(git clone:*)",
+              "Bash(git init:*)",
+              "Bash(git rm:*)",
+              "Bash(git mv:*)"
+            ],
+            "deny": []
+          },
+          "statusLine": {
+            "command": "echo \" API: $(echo ${ANTHROPIC_BASE_URL:-not set} | cut -d'/' -f3 | cut -d'.' -f2)| $(ccline) \"",
+            "padding": 0,
+            "type": "command"
+          }
+        }
+      },
+      "593a7889-b49e-4167-aa2f-93f11b22e91c": {
+        "id": "593a7889-b49e-4167-aa2f-93f11b22e91c",
+        "name": "Zhipu GLM",
+        "settingsConfig": {
+          "env": {
+            "ANTHROPIC_AUTH_TOKEN": "12312312312",
+            "ANTHROPIC_BASE_URL": "https://open.bigmodel.cn/api/anthropic",
+            "ANTHROPIC_DEFAULT_HAIKU_MODEL": "glm-4.5-air",
+            "ANTHROPIC_DEFAULT_OPUS_MODEL": "glm-4.6",
+            "ANTHROPIC_DEFAULT_SONNET_MODEL": "glm-4.6",
+            "ANTHROPIC_MODEL": "GLM-4.6",
+            "ANTHROPIC_SMALL_FAST_MODEL": "glm-4.5-air"
+          }
+        },
+        "websiteUrl": "https://open.bigmodel.cn",
+        "category": "cn_official",
+        "createdAt": 1760417813883,
+        "meta": {
+          "custom_endpoints": {
+            "https://open.bigmodel.cn/api/anthropic": {
+              "url": "https://open.bigmodel.cn/api/anthropic",
+              "addedAt": 1760417813882
+            }
+          }
+        }
+      }
+    },
+    "current": "88code"
+  },
+  "codex": {
+    "providers": {
+      "default": {
+        "id": "default",
+        "name": "default",
+        "settingsConfig": {
+          "auth": {
+            "OPENAI_API_KEY": "sk-gpu6RQk2bBkXa"
+          },
+          "config": "model_provider = \"packycode\"\nmodel = \"gpt-5\"\nmodel_reasoning_effort = \"high\"\ndisable_response_storage = true\n\n[model_providers.packycode]\nname = \"packycode\"\nbase_url = \"https://codex-api.packycode.com/v1\"\nwire_api = \"responses\"\nrequires_openai_auth = true\n\n[projects.\"/home/yunxin/Documents/Code/project/Dissertation\"]\ntrust_level = \"trusted\"\n\n[projects.\"/home/yunxin/Documents/Code/tools/ECGVisulization\"]\ntrust_level = \"trusted\"\n\n[projects.\"/home/yunxin/Documents/Code/project/DAPLINK/SkyStar-STM32F407VxT6-DAPLINK\"]\ntrust_level = \"trusted\"\n\n[projects.\"/home/yunxin/Documents/Code/project/DAPLINK/stm32DAPlink\"]\ntrust_level = \"trusted\"\n\n[projects.\"/home/yunxin/Documents/Code/tools/prompt\"]\ntrust_level = \"trusted\"\n\n[projects.\"/home/yunxin/Documents/Code/project/DAPLINK/offlineDaplink\"]\ntrust_level = \"trusted\"\n\n[projects.\"/home/yunxin/Documents/Code/tools/serena\"]\ntrust_level = \"trusted\"\n\n[projects.\"/home/yunxin/Documents/Code/project/thermal-detect\"]\ntrust_level = \"trusted\"\n\n[projects.\"/home/yunxin\"]\ntrust_level = \"trusted\"\n\n[projects.\"/home/yunxin/Documents/Code/project/thermal-detect/python\"]\ntrust_level = \"trusted\"\n\n[mcp_servers.serena]\ncommand = \"/home/yunxin/.local/bin/uvx\"\nargs = [\"--from\", \"/home/yunxin/Documents/Code/tools/serena\", \"serena\", \"start-mcp-server\", \"--context\", \"codex\"]\nstartup_timeout_ms = 60000\n"
+        }
+      }
+    },
+    "current": "default"
+  },
+  "mcp": {
+    "claude": {
+      "servers": {}
+    },
+    "codex": {
+      "servers": {}
+    }
+  }
+}
