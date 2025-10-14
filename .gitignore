@@ -1,5 +1,12 @@
 /target
 
+# Universal ignores
+.DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/
 
 # Added by cargo
 #

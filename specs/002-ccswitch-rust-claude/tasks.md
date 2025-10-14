@@ -22,10 +22,10 @@
 
 **Purpose**: Project initialization and basic Rust project structure
 
-- [ ] T001 Initialize Rust project with Cargo.toml dependencies (clap, serde, serde_json, anyhow, dirs, percent-encoding, clap_complete)
-- [ ] T002 [P] Configure Cargo.toml with edition 2024, metadata, and feature flags
-- [ ] T003 [P] Create project directory structure (src/config/, src/commands/, src/utils/)
-- [ ] T004 [P] Setup Clippy and rustfmt configuration in .cargo/config.toml
+ - [X] T001 Initialize Rust project with Cargo.toml dependencies (clap, serde, serde_json, anyhow, dirs, percent-encoding, clap_complete)
+ - [X] T002 [P] Configure Cargo.toml with edition 2024, metadata, and feature flags
+ - [X] T003 [P] Create project directory structure (src/config/, src/commands/, src/utils/)
+ - [X] T004 [P] Setup Clippy and rustfmt configuration in .cargo/config.toml
 
 ---
 
@@ -35,15 +35,15 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T005 Create error types module in src/error.rs (ConfigError, IoError, JsonError enums)
-- [ ] T006 [P] Implement URL encoding utilities in src/utils/encoding.rs (encode_config_name, decode_config_name with percent-encoding)
-- [ ] T007 [P] Implement filesystem utilities in src/utils/fs.rs (expand_tilde, ensure_dir_exists, get_config_paths)
-- [ ] T008 Create data structures in src/config/parser.rs (ConfigCollection, ClaudeConfig, Provider structs with serde derives)
-- [ ] T009 Implement config.json parser in src/config/parser.rs (parse_config_file function with error handling)
-- [ ] T010 [P] Create config manager skeleton in src/config/manager.rs (ConfigManager struct and trait definition)
-- [ ] T011 [P] Create CLI argument parser skeleton in src/main.rs (clap derive structs for Cli, Subcommands)
-- [ ] T012 Setup utils module exports in src/utils/mod.rs
-- [ ] T013 Setup config module exports in src/config/mod.rs
+ - [X] T005 Create error types module in src/error.rs (ConfigError, IoError, JsonError enums)
+ - [X] T006 [P] Implement URL encoding utilities in src/utils/encoding.rs (encode_config_name, decode_config_name with percent-encoding)
+ - [X] T007 [P] Implement filesystem utilities in src/utils/fs.rs (expand_tilde, ensure_dir_exists, get_config_paths)
+ - [X] T008 Create data structures in src/config/parser.rs (ConfigCollection, ClaudeConfig, Provider structs with serde derives)
+ - [X] T009 Implement config.json parser in src/config/parser.rs (parse_config_file function with error handling)
+ - [X] T010 [P] Create config manager skeleton in src/config/manager.rs (ConfigManager struct and trait definition)
+ - [X] T011 [P] Create CLI argument parser skeleton in src/main.rs (clap derive structs for Cli, Subcommands)
+ - [X] T012 Setup utils module exports in src/utils/mod.rs
+ - [X] T013 Setup config module exports in src/config/mod.rs
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -57,15 +57,15 @@
 
 ### Implementation for User Story 1
 
-- [ ] T014 [P] [US1] Implement duplicate name handling logic in src/config/manager.rs (handle_duplicate_names function with suffix counter)
-- [ ] T015 [P] [US1] Implement config extraction logic in src/config/manager.rs (extract_providers function: parse providers, handle duplicates, encode names)
-- [ ] T016 [US1] Implement config file writing in src/config/manager.rs (write_separated_config function with atomic write and error handling)
-- [ ] T017 [US1] Implement init command logic in src/commands/init.rs (read config.json, extract providers, write files to separated/)
-- [ ] T018 [US1] Add re-initialization confirmation prompt in src/commands/init.rs (check if separated/ exists, prompt with dialoguer or stdin)
-- [ ] T019 [US1] Add --force flag handling in src/commands/init.rs (skip prompt if --force is set)
-- [ ] T020 [US1] Wire init command to main CLI in src/main.rs (match Subcommands::Init branch, call init command handler)
-- [ ] T021 [US1] Add error messages and logging to stderr in src/commands/init.rs (use eprintln! for [INFO], [WARN], [ERROR])
-- [ ] T022 [US1] Create commands module exports in src/commands/mod.rs
+ - [X] T014 [P] [US1] Implement duplicate name handling logic in src/config/manager.rs (handle_duplicate_names function with suffix counter)
+ - [X] T015 [P] [US1] Implement config extraction logic in src/config/manager.rs (extract_providers function: parse providers, handle duplicates, encode names)
+ - [X] T016 [US1] Implement config file writing in src/config/manager.rs (write_separated_config function with atomic write and error handling)
+ - [X] T017 [US1] Implement init command logic in src/commands/init.rs (read config.json, extract providers, write files to separated/)
+ - [X] T018 [US1] Add re-initialization confirmation prompt in src/commands/init.rs (check if separated/ exists, prompt with dialoguer or stdin)
+ - [X] T019 [US1] Add --force flag handling in src/commands/init.rs (skip prompt if --force is set)
+ - [X] T020 [US1] Wire init command to main CLI in src/main.rs (match Subcommands::Init branch, call init command handler)
+ - [X] T021 [US1] Add error messages and logging to stderr in src/commands/init.rs (use eprintln! for [INFO], [WARN], [ERROR])
+ - [X] T022 [US1] Create commands module exports in src/commands/mod.rs
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - `ccstart init` creates separated configs
 
@@ -79,13 +79,13 @@
 
 ### Implementation for User Story 2
 
-- [ ] T023 [P] [US2] Implement config lookup logic in src/config/manager.rs (find_config_file function: encode name, check file existence)
-- [ ] T024 [P] [US2] Implement Claude CLI execution in src/commands/run.rs (build command with --settings flag, handle args with proper quoting)
-- [ ] T025 [US2] Add exit code passthrough in src/commands/run.rs (use std::process::Command, return child exit code)
-- [ ] T026 [US2] Add config not found error handling in src/commands/run.rs (list available configs from separated/ directory)
-- [ ] T027 [US2] Wire run command (<name> positional arg) to main CLI in src/main.rs (handle positional config name argument, pass trailing args)
-- [ ] T028 [US2] Configure clap for trailing args in src/main.rs (use trailing_var_arg = true and allow_hyphen_values = true)
-- [ ] T029 [US2] Add quotes handling for paths with spaces in src/commands/run.rs (ensure --settings path is quoted)
+ - [X] T023 [P] [US2] Implement config lookup logic in src/config/manager.rs (find_config_file function: encode name, check file existence)
+ - [X] T024 [P] [US2] Implement Claude CLI execution in src/commands/run.rs (build command with --settings flag, handle args with proper quoting)
+ - [X] T025 [US2] Add exit code passthrough in src/commands/run.rs (use std::process::Command, return child exit code)
+ - [X] T026 [US2] Add config not found error handling in src/commands/run.rs (list available configs from separated/ directory)
+ - [X] T027 [US2] Wire run command (<name> positional arg) to main CLI in src/main.rs (handle positional config name argument, pass trailing args)
+ - [X] T028 [US2] Configure clap for trailing args in src/main.rs (use trailing_var_arg = true and allow_hyphen_values = true)
+ - [X] T029 [US2] Add quotes handling for paths with spaces in src/commands/run.rs (ensure --settings path is quoted)
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work - MVP is complete (init + run)
 
