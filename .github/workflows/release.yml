@@ -6,6 +6,9 @@ on:
       - 'v*'
   workflow_dispatch: {}
 
+permissions:
+  contents: write
+
 jobs:
   build:
     strategy:
@@ -66,13 +69,20 @@ jobs:
             ${{ matrix.artifact_name }}${{ matrix.bin_ext }}
             ${{ matrix.artifact_name }}${{ matrix.bin_ext }}.sha256
 
+  release:
+    if: startsWith(github.ref, 'refs/tags/')
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
       - name: Publish GitHub Release
-        if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2
         with:
-          files: |
-            ${{ matrix.artifact_name }}${{ matrix.bin_ext }}
-            ${{ matrix.artifact_name }}${{ matrix.bin_ext }}.sha256
+          files: artifacts/**/*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
