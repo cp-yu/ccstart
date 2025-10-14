@@ -5,8 +5,8 @@ edition = "2024"
 
 [dependencies]
 anyhow = "1"
-clap = { version = "4", features = ["derive"] }
-clap_complete = "4"
+clap = { version = "4", features = ["derive", "cargo", "unstable-ext"] }
+clap_complete = { version = "4", features = ["unstable-dynamic"] }
 dirs = "5"
 percent-encoding = "2"
 serde = { version = "1", features = ["derive"] }
