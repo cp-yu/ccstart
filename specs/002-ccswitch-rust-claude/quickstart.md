@@ -109,7 +109,10 @@ $ ccstart "Zhipu GLM" "你好"
 
 **Bash**：
 ```bash
-# 添加到 ~/.bashrc
+# 方式一（推荐）：写入补全目录
+ccstart completions bash > ~/.bash_completion.d/ccstart
+
+# 方式二：动态加载（写入 ~/.bashrc）
 echo 'eval "$(ccstart completions bash)"' >> ~/.bashrc
 source ~/.bashrc
 
@@ -119,8 +122,12 @@ ccstart <Tab>
 
 **Zsh**：
 ```bash
-# 添加到 ~/.zshrc
-echo 'eval "$(ccstart completions zsh)"' >> ~/.zshrc
+# 方式一：直接写入 ~/.zshrc（内嵌脚本）
+ccstart completions zsh > ~/.zshrc
+source ~/.zshrc
+
+# 方式二（推荐）：写入 completions 目录
+ccstart completions zsh > ~/.zsh/completions/_ccstart
 source ~/.zshrc
 
 # 测试补全
@@ -133,6 +140,15 @@ ccstart <Tab>
 ccstart completions fish > ~/.config/fish/completions/ccstart.fish
 
 # 测试补全
+ccstart <Tab>
+```
+
+**PowerShell**：
+```powershell
+# 写入当前用户的 PowerShell 配置文件
+ccstart completions powershell | Out-File -Encoding utf8 -FilePath $PROFILE
+
+# 重启 PowerShell 或手动 dot-source 配置文件后测试
 ccstart <Tab>
 ```
 

@@ -136,13 +136,13 @@
 
 ### Implementation for User Story 3
 
-- [ ] T041 [P] [US3] Implement completions command skeleton in src/commands/completions.rs (accept shell type: bash, zsh, fish, powershell)
-- [ ] T042 [P] [US3] Implement static completion generation in src/commands/completions.rs (use clap_complete::generate to output completion script to stdout)
+ - [X] T041 [P] [US3] Implement completions command skeleton in src/commands/completions.rs (accept shell type: bash, zsh, fish, powershell)
+ - [X] T042 [P] [US3] Implement static completion generation in src/commands/completions.rs (use clap_complete::generate to output completion script to stdout)
 - [ ] T043 [US3] Implement dynamic completion logic in src/main.rs (use CompleteEnv::complete() at program start to intercept completion requests)
 - [ ] T044 [US3] Implement ValueCompleter for config names in src/main.rs (read separated/ directory, return config list with proper quoting)
 - [ ] T045 [US3] Handle spaces and special chars in completions in src/main.rs (wrap config names with quotes in completion results)
-- [ ] T046 [US3] Wire completions command to main CLI in src/main.rs (match Subcommands::Completions branch)
-- [ ] T047 [US3] Add shell type validation in src/commands/completions.rs (validate shell argument, return error for unsupported shells)
+ - [X] T046 [US3] Wire completions command to main CLI in src/main.rs (match Subcommands::Completions branch)
+ - [X] T047 [US3] Add shell type validation in src/commands/completions.rs (validate shell argument, return error for unsupported shells)
 
 **Checkpoint**: All user stories are now independently functional - shell completion enhances UX
 

@@ -277,14 +277,23 @@ complete -F _ccstart ccstart
 
 **使用方法**：
 ```bash
-# Bash
+# Bash（两种方式，二选一）
+# 1) 持久化到补全目录（推荐）
+ccstart completions bash > ~/.bash_completion.d/ccstart
+# 2) 动态加载（在 .bashrc 中 eval）
 echo 'eval "$(ccstart completions bash)"' >> ~/.bashrc
 
-# Zsh
-echo 'eval "$(ccstart completions zsh)"' >> ~/.zshrc
+# Zsh（两种方式，二选一）
+# 1) 写入 ~/.zshrc（直接内嵌脚本）
+ccstart completions zsh > ~/.zshrc
+# 2) 存放到 completions 目录（推荐）
+ccstart completions zsh > ~/.zsh/completions/_ccstart && source ~/.zshrc
 
-# Fish
+# Fish（写入标准补全路径）
 ccstart completions fish > ~/.config/fish/completions/ccstart.fish
+
+# PowerShell（写入 Profile）
+ccstart completions powershell | Out-File -Encoding utf8 -FilePath $PROFILE
 ```
 
 #### 退出码
