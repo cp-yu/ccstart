@@ -1,6 +1,7 @@
 use crate::config::manager::ConfigManager;
 use crate::error::AppResult;
 use anyhow::Context;
+#[cfg(unix)]
 use std::os::unix::process::ExitStatusExt;
 use std::process::Command;
 
@@ -40,9 +41,19 @@ pub fn run(name: &str, args: &[String]) -> AppResult<i32> {
     if let Some(code) = status.code() {
         Ok(code)
     } else {
-        // 被信号终止（Unix）
-        let sig = status.signal().unwrap_or_default();
-        eprintln!("[WARN] 进程被信号终止: {}", sig);
-        Ok(128 + sig)
+        // 子进程未返回常规退出码
+        #[cfg(unix)]
+        {
+            // Unix: 可能被信号终止
+            let sig = status.signal().unwrap_or_default();
+            eprintln!("[WARN] 进程被信号终止: {}", sig);
+            Ok(128 + sig)
+        }
+        #[cfg(not(unix))]
+        {
+            // Windows: 无信号概念，按失败处理
+            eprintln!("[WARN] 子进程未返回退出码（非 Unix 平台），按失败处理");
+            Ok(1)
+        }
     }
 }
