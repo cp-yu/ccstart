@@ -277,22 +277,23 @@ complete -F _ccstart ccstart
 
 **使用方法**：
 ```bash
-# Bash（两种方式，二选一）
-# 1) 持久化到补全目录（推荐）
+# 推荐（动态补全，实时读取配置列表）
+# Bash
+echo "source <(COMPLETE=bash ccstart)" >> ~/.bashrc
+
+# Zsh
+echo "source <(COMPLETE=zsh ccstart)" >> ~/.zshrc
+
+# Fish
+echo "COMPLETE=fish ccstart | source" >> ~/.config/fish/config.fish
+
+# PowerShell
+$env:COMPLETE = "powershell"; echo "ccstart | Out-String | Invoke-Expression" >> $PROFILE; Remove-Item Env:\COMPLETE
+
+# 备选（静态脚本，功能稳定但名称列表非实时）
 ccstart completions bash > ~/.bash_completion.d/ccstart
-# 2) 动态加载（在 .bashrc 中 eval）
-echo 'eval "$(ccstart completions bash)"' >> ~/.bashrc
-
-# Zsh（两种方式，二选一）
-# 1) 写入 ~/.zshrc（直接内嵌脚本）
-ccstart completions zsh > ~/.zshrc
-# 2) 存放到 completions 目录（推荐）
-ccstart completions zsh > ~/.zsh/completions/_ccstart && source ~/.zshrc
-
-# Fish（写入标准补全路径）
+ccstart completions zsh > ~/.zsh/completions/_ccstart
 ccstart completions fish > ~/.config/fish/completions/ccstart.fish
-
-# PowerShell（写入 Profile）
 ccstart completions powershell | Out-File -Encoding utf8 -FilePath $PROFILE
 ```
 

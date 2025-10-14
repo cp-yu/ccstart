@@ -107,27 +107,18 @@ $ ccstart "Zhipu GLM" "你好"
 
 让配置名称自动补全，提升使用体验。
 
-**Bash**：
+**Bash（推荐：动态补全）**：
 ```bash
-# 方式一（推荐）：写入补全目录
-ccstart completions bash > ~/.bash_completion.d/ccstart
-
-# 方式二：动态加载（写入 ~/.bashrc）
-echo 'eval "$(ccstart completions bash)"' >> ~/.bashrc
+echo "source <(COMPLETE=bash ccstart)" >> ~/.bashrc
 source ~/.bashrc
 
 # 测试补全
 ccstart <Tab>
 ```
 
-**Zsh**：
+**Zsh（推荐：动态补全）**：
 ```bash
-# 方式一：直接写入 ~/.zshrc（内嵌脚本）
-ccstart completions zsh > ~/.zshrc
-source ~/.zshrc
-
-# 方式二（推荐）：写入 completions 目录
-ccstart completions zsh > ~/.zsh/completions/_ccstart
+echo "source <(COMPLETE=zsh ccstart)" >> ~/.zshrc
 source ~/.zshrc
 
 # 测试补全
@@ -136,8 +127,8 @@ ccstart <Tab>
 
 **Fish**：
 ```bash
-# 生成补全文件
-ccstart completions fish > ~/.config/fish/completions/ccstart.fish
+# 推荐：动态补全
+echo "COMPLETE=fish ccstart | source" >> ~/.config/fish/config.fish
 
 # 测试补全
 ccstart <Tab>
@@ -386,3 +377,17 @@ MIT / Apache 2.0 双许可证
 ---
 
 **祝使用愉快！🎉**
+**PowerShell**：
+```powershell
+$env:COMPLETE = "powershell"; echo "ccstart | Out-String | Invoke-Expression" >> $PROFILE; Remove-Item Env:\COMPLETE
+
+# 重启 PowerShell 或手动 dot-source 配置文件后测试
+ccstart <Tab>
+```
+
+注：若偏好静态文件方式，可使用：
+```bash
+ccstart completions bash > ~/.bash_completion.d/ccstart
+ccstart completions zsh > ~/.zsh/completions/_ccstart
+ccstart completions fish > ~/.config/fish/completions/ccstart.fish
+```

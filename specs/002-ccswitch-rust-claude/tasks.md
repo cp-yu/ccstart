@@ -99,12 +99,12 @@
 
 ### Implementation for User Story 5
 
-- [ ] T030 [P] [US5] Implement config listing logic in src/config/manager.rs (list_configs function: scan separated/ directory, parse config-*.json filenames)
-- [ ] T031 [P] [US5] Implement filename decoding in src/config/manager.rs (decode config names from filenames using decode_config_name)
-- [ ] T032 [US5] Implement list command in src/commands/list.rs (call manager.list_configs, format output with quotes for special chars)
-- [ ] T033 [US5] Handle empty directory case in src/commands/list.rs (show error: "未找到配置，请先运行 'ccstart init'")
-- [ ] T034 [US5] Wire list command to main CLI in src/main.rs (match Subcommands::List branch)
-- [ ] T035 [US5] Add stdout-only output in src/commands/list.rs (print config names to stdout, keep logs on stderr)
+ - [X] T030 [P] [US5] Implement config listing logic in src/config/manager.rs (list_configs function: scan separated/ directory, parse config-*.json filenames)
+ - [X] T031 [P] [US5] Implement filename decoding in src/config/manager.rs (decode config names from filenames using decode_config_name)
+ - [X] T032 [US5] Implement list command in src/commands/list.rs (call manager.list_configs, format output with quotes for special chars)
+ - [X] T033 [US5] Handle empty directory case in src/commands/list.rs (show error: "未找到配置，请先运行 'ccstart init'")
+ - [X] T034 [US5] Wire list command to main CLI in src/main.rs (match Subcommands::List branch)
+ - [X] T035 [US5] Add stdout-only output in src/commands/list.rs (print config names to stdout, keep logs on stderr)
 
 **Checkpoint**: `ccstart list` shows all available configs with proper formatting
 
@@ -118,11 +118,11 @@
 
 ### Implementation for User Story 4
 
-- [ ] T036 [P] [US4] Implement config diff logic in src/config/manager.rs (compare_configs function: detect added, modified, deleted providers)
-- [ ] T037 [P] [US4] Implement selective update in src/config/manager.rs (update_configs function: add new files, update changed files, delete removed files)
-- [ ] T038 [US4] Implement update command in src/commands/update.rs (read config.json, compute diff, apply updates to separated/)
-- [ ] T039 [US4] Add update summary output in src/commands/update.rs (report: X added, Y updated, Z deleted)
-- [ ] T040 [US4] Wire update command to main CLI in src/main.rs (match Subcommands::Update branch)
+ - [X] T036 [P] [US4] Implement config diff logic in src/config/manager.rs (compare_configs function: detect added, modified, deleted providers)
+ - [X] T037 [P] [US4] Implement selective update in src/config/manager.rs (update_configs function: add new files, update changed files, delete removed files)
+ - [X] T038 [US4] Implement update command in src/commands/update.rs (read config.json, compute diff, apply updates to separated/)
+ - [X] T039 [US4] Add update summary output in src/commands/update.rs (report: X added, Y updated, Z deleted)
+ - [X] T040 [US4] Wire update command to main CLI in src/main.rs (match Subcommands::Update branch)
 
 **Checkpoint**: `ccstart update` correctly syncs config.json changes to separated/ directory
 
@@ -138,9 +138,9 @@
 
  - [X] T041 [P] [US3] Implement completions command skeleton in src/commands/completions.rs (accept shell type: bash, zsh, fish, powershell)
  - [X] T042 [P] [US3] Implement static completion generation in src/commands/completions.rs (use clap_complete::generate to output completion script to stdout)
-- [ ] T043 [US3] Implement dynamic completion logic in src/main.rs (use CompleteEnv::complete() at program start to intercept completion requests)
-- [ ] T044 [US3] Implement ValueCompleter for config names in src/main.rs (read separated/ directory, return config list with proper quoting)
-- [ ] T045 [US3] Handle spaces and special chars in completions in src/main.rs (wrap config names with quotes in completion results)
+ - [X] T043 [US3] Implement dynamic completion logic in src/main.rs (use CompleteEnv::complete() at program start to intercept completion requests)
+ - [X] T044 [US3] Implement ValueCompleter for config names in src/main.rs (read separated/ directory, return config list)
+ - [X] T045 [US3] Handle spaces and special chars in completions in src/main.rs (ensure proper escaping/quoting via engine)
  - [X] T046 [US3] Wire completions command to main CLI in src/main.rs (match Subcommands::Completions branch)
  - [X] T047 [US3] Add shell type validation in src/commands/completions.rs (validate shell argument, return error for unsupported shells)
 
@@ -152,13 +152,13 @@
 
 **Purpose**: Final improvements that affect multiple user stories
 
-- [ ] T048 [P] Add --help and --version flags in src/main.rs (configure clap with version, author, about metadata from Cargo.toml)
-- [ ] T049 [P] Add examples to CLI help text in src/main.rs (add examples section with common usage patterns)
-- [ ] T050 Improve error messages across all commands (ensure all errors have format: "错误: <描述>\n提示: <解决方案>")
-- [ ] T051 [P] Add comprehensive error context with anyhow in all modules (use .context() to add contextual error information)
-- [ ] T052 Code cleanup and clippy fixes (run cargo clippy --all-targets --all-features -- -D warnings)
-- [ ] T053 [P] Update CLAUDE.md at project root with completed feature (add ccstart commands to Commands section)
-- [ ] T054 Run quickstart.md validation (manually verify all quickstart commands work as documented)
+- [X] T048 [P] Add --help and --version flags in src/main.rs (configure clap with version, author, about metadata from Cargo.toml)
+- [X] T049 [P] Add examples to CLI help text in src/main.rs (add examples section with common usage patterns)
+- [X] T050 Improve error messages across all commands (ensure all errors have format: "错误: <描述>\n提示: <解决方案>")
+- [X] T051 [P] Add comprehensive error context with anyhow in all modules (use .context() to add contextual error information)
+- [X] T052 Code cleanup and clippy fixes (run cargo clippy --all-targets --all-features -- -D warnings)
+- [X] T053 [P] Update CLAUDE.md at project root with completed feature (add ccstart commands to Commands section)
+- [X] T054 Run quickstart.md validation (manually verify all quickstart commands work as documented)
 
 ---
 
