@@ -1,0 +1,7 @@
+[alias]
+# Lint all targets/features and deny warnings
+clippy-all = "clippy --all-targets --all-features -- -D warnings"
+
+# Format the entire workspace
+fmt-all = "fmt --all"
+

@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "env": {
+    "DISABLE_TELEMETRY": "1",
+    "DISABLE_ERROR_REPORTING": "1",
+    "CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC": "1",
+    "ANTHROPIC_BASE_URL": "https://api-us-cn2.packycode.com",
+    "API_TIMEOUT_MS": "3000000",
+    "ANTHROPIC_AUTH_TOKEN": "sk-N8EvxOIjpgDJWIYfgD",
+    "MAX_THINKING_TOKENS": "32000"
+  },
+  "includeCoAuthoredBy": false,
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "LS",
+      "Read",
+      "Agent",
+      "Write",
+      "Edit",
+      "MultiEdit",
+      "Glob",
+      "Grep",
+      "WebFetch",
+      "WebSearch",
+      "TodoWrite",
+      "NotebookRead",
+      "NotebookEdit",
+      "mcp__ide",
+      "mcp__exa",
+      "mcp__context7",
+      "mcp__mcp-deepwiki",
+      "mcp__Playwright",
+      "mcp__spec-workflow",
+      "mcp__open-websearch"
+    ],
+    "deny": [],
+    "ask": [
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git pull:*)",
+      "Bash(git merge:*)",
+      "Bash(git rebase:*)",
+      "Bash(git reset:*)",
+      "Bash(git checkout:*)",
+      "Bash(git branch:*)",
+      "Bash(git clone:*)",
+      "Bash(git init:*)",
+      "Bash(git rm:*)",
+      "Bash(git mv:*)"
+    ]
+  },
+  "hooks": {},
+  "statusLine": {
+    "type": "command",
+    "command": "echo \" API: $(echo ${ANTHROPIC_BASE_URL:-not set} | cut -d'/' -f3 | cut -d'.' -f2)| $(ccline) \"",
+    "padding": 0
+  },
+  "outputStyle": "default"
+}
