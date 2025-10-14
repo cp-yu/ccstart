@@ -11,27 +11,12 @@ pub fn run(shell: Shell) -> AppResult<()> {
     generate(shell, &mut cmd, bin_name, &mut io::stdout());
     // 在 stderr 给出安装说明，避免污染 stdout 的脚本内容
     eprintln!("[INFO] 已生成 {:?} 补全脚本到 stdout", shell);
-    match shell {
-        Shell::Bash => {
-            eprintln!("安装示例 (二选一)：");
-            eprintln!("  - 持久化: ccstart completions bash > ~/.bash_completion.d/ccstart");
-            eprintln!("  - 动态加载: echo 'eval \"$(ccstart completions bash)\"' >> ~/.bashrc");
-        }
-        Shell::Zsh => {
-            eprintln!("安装示例 (二选一)：");
-            eprintln!("  - 写入 rc: ccstart completions zsh > ~/.zshrc");
-            eprintln!("  - 建议方式: ccstart completions zsh > ~/.zsh/completions/_ccstart && source ~/.zshrc");
-        }
-        Shell::Fish => {
-            eprintln!("安装示例：ccstart completions fish > ~/.config/fish/completions/ccstart.fish");
-        }
-        Shell::PowerShell => {
-            eprintln!("安装示例：ccstart completions powershell | Out-File -Encoding utf8 -FilePath $PROFILE");
-        }
-        _ => {
-            eprintln!("提示：将 stdout 内容保存到相应 shell 的补全加载路径");
-        }
-    }
+    eprintln!("[推荐] 动态补全（实时读取配置）安装示例：");
+    eprintln!("  - Bash: echo \"source <(COMPLETE=bash ccstart)\" >> ~/.bashrc");
+    eprintln!("  - Zsh:  echo \"source <(COMPLETE=zsh ccstart)\" >> ~/.zshrc");
+    eprintln!("  - Fish: echo \"COMPLETE=fish ccstart | source\" >> ~/.config/fish/config.fish");
+    eprintln!("  - PowerShell: $env:COMPLETE = 'powershell'; echo \"ccstart | Out-String | Invoke-Expression\" >> $PROFILE; Remove-Item Env:\\COMPLETE");
+    eprintln!("[备选] 静态脚本（非实时）：ccstart completions <shell> > <path>");
 
     Ok(())
 }
