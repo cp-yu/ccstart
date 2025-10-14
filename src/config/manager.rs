@@ -6,10 +6,10 @@ use crate::utils::{
 use crate::config::parser::{ConfigCollection, Provider};
 use anyhow::Context;
 use serde_json::Value;
-use std::collections::{BTreeMap, HashMap};
+use std::collections::HashMap;
 use std::fs;
 use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 pub struct ConfigManager;
 
@@ -35,9 +35,7 @@ impl ConfigManager {
         // 使用 BTreeMap 确保稳定顺序
         let mut items: Vec<(String, Provider)> = collection
             .claude
-            .providers
-            .iter()
-            .map(|(_k, v)| (Self::display_name(v), v.clone()))
+            .providers.values().map(|v| (Self::display_name(v), v.clone()))
             .collect();
         // 稳定排序以保证确定性
         items.sort_by(|a, b| a.0.cmp(&b.0));
@@ -47,7 +45,7 @@ impl ConfigManager {
 
         items
             .into_iter()
-            .zip(unique.into_iter())
+            .zip(unique)
             .map(|((orig_name, prov), uniq)| {
                 let encoded = encode_config_name(&uniq);
                 (orig_name, uniq, encoded, prov.settings_config)
@@ -71,7 +69,7 @@ impl ConfigManager {
         ensure_dir_exists(&paths.separated_dir)?;
 
         let mut written = Vec::with_capacity(items.len());
-        for (_orig, uniq, encoded, json) in items {
+        for (_orig, _uniq, encoded, json) in items {
             let file_name = format!("config-{}.json", encoded);
             let target = paths.separated_dir.join(file_name);
 
@@ -118,15 +116,12 @@ impl ConfigManager {
             if !path.is_file() {
                 continue;
             }
-            if let Some(fname) = path.file_name().and_then(|s| s.to_str()) {
-                if let Some(rest) = fname.strip_prefix("config-") {
-                    if let Some(encoded) = rest.strip_suffix(".json") {
-                        if let Ok(decoded) = decode_config_name(encoded) {
+            if let Some(fname) = path.file_name().and_then(|s| s.to_str())
+                && let Some(rest) = fname.strip_prefix("config-")
+                    && let Some(encoded) = rest.strip_suffix(".json")
+                        && let Ok(decoded) = decode_config_name(encoded) {
                             results.push(decoded);
                         }
-                    }
-                }
-            }
         }
         results.sort();
         Ok(results)

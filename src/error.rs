@@ -1,6 +1,7 @@
 use std::fmt;
 
 /// Domain-specific configuration errors
+#[allow(dead_code)]
 #[derive(Debug)]
 pub enum ConfigError {
     InvalidStructure(String),
@@ -19,6 +20,7 @@ impl fmt::Display for ConfigError {
 }
 
 /// I/O 错误占位符（如需分类使用）
+#[allow(dead_code)]
 #[derive(Debug)]
 pub enum IoError {
     PathNotFound(String),
@@ -35,6 +37,7 @@ impl fmt::Display for IoError {
 }
 
 /// JSON 解析错误占位符（如需分类使用）
+#[allow(dead_code)]
 #[derive(Debug)]
 pub enum JsonError {
     ParseError(String),
@@ -49,4 +52,3 @@ impl fmt::Display for JsonError {
 }
 
 pub type AppResult<T> = Result<T, anyhow::Error>;
-
