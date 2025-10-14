@@ -31,7 +31,23 @@
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-[Gates determined based on constitution file]
+### KISS原则 (Keep It Simple, Stupid)
+- [ ] 解决方案是否采用最简单的方法？
+- [ ] 是否避免了不必要的抽象和过度设计？
+- [ ] 如果引入复杂度，是否有充分理由说明为什么简单方案不可行？
+
+### 轮子复用原则 (Don't Reinvent the Wheel)
+- [ ] 是否调研了现有的开源解决方案（库、框架、工具）？
+- [ ] 如果选择自己实现，是否记录了以下理由之一：
+  - 现有方案无法满足核心需求
+  - 现有方案存在严重的性能、安全或维护性问题
+  - 引入现有方案的成本超过自己实现
+- [ ] 使用的第三方库是否满足：活跃维护、良好文档、社区支持、许可证兼容？
+
+### Linus三问原则
+- [ ] **What**: 功能目标是否清晰明确？
+- [ ] **Why**: 是否明确说明了为什么需要这个功能和为什么这样实现？
+- [ ] **Better**: 是否考虑了其他实现方案，并说明为什么当前方案是合理选择？
 
 ## Project Structure
 
@@ -98,7 +114,9 @@ directories captured above]
 
 *Fill ONLY if Constitution Check has violations that must be justified*
 
-| Violation | Why Needed | Simpler Alternative Rejected Because |
-|-----------|------------|-------------------------------------|
-| [e.g., 4th project] | [current need] | [why 3 projects insufficient] |
-| [e.g., Repository pattern] | [specific problem] | [why direct DB access insufficient] |
+根据KISS原则，任何复杂度的引入都必须在此处明确说明理由：
+
+| 复杂度类型 | 为什么需要 | 为什么更简单的方案不可行 |
+|-----------|------------|-------------------------|
+| [例如：自定义解析器] | [具体需求] | [为什么现有库不满足] |
+| [例如：多层抽象] | [当前需求] | [为什么直接实现不够] |

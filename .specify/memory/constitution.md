@@ -1,50 +1,161 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report - Constitution Update
+=========================================
+Version change: [Initial] → 1.0.0
+Change type: MINOR (Initial constitution establishment)
 
-## Core Principles
+Modified principles: N/A (Initial creation)
+Added sections:
+  - Core Principles (KISS原则, 轮子复用原则, Linus三问)
+  - Development Workflow
+  - Code Review Process
+  - Governance
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+Removed sections: N/A
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+Templates requiring updates:
+  ✅ .specify/templates/plan-template.md - Updated with constitution gates
+  ✅ .specify/templates/spec-template.md - Verified alignment
+  ✅ .specify/templates/tasks-template.md - Verified alignment
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+Follow-up TODOs: None
+-->
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+# ccstart 项目宪章
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+## 核心原则
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### I. KISS原则 (Keep It Simple, Stupid)
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+**规定**：所有代码、架构和设计决策必须追求简单性。
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+**具体要求**：
+- 优先选择最简单、最直接的解决方案
+- 避免过度设计和不必要的抽象
+- 在添加任何复杂性之前，必须明确说明为什么简单方案不可行
+- 代码应该易于理解和维护，复杂度必须有充分的理由支持
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+**理由**：简单的代码更容易理解、测试、维护和调试。复杂性是bug的温床，应该被视为技术债务。
 
-## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
+### II. 轮子复用原则 (Don't Reinvent the Wheel)
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+**规定**：必须优先使用成熟的库、框架和工具，而不是自己实现。
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**具体要求**：
+- 在实现任何功能前，必须先调研是否有成熟的开源解决方案
+- 只有在以下情况下才允许自己实现：
+  1. 现有方案无法满足核心需求
+  2. 现有方案存在严重的性能、安全或维护性问题
+  3. 引入现有方案的成本（依赖、复杂度）超过自己实现
+- 选择第三方库时，优先考虑：活跃维护、良好文档、社区支持、许可证兼容
+- 所有"重新发明轮子"的决定必须在代码审查中明确记录理由
+
+**理由**：成熟的库经过了大量测试和实践验证，重新实现不仅浪费时间，还可能引入额外的bug和维护负担。
+
+### III. Linus三问原则
+
+**规定**：所有代码提交必须能够清晰回答以下三个问题：
+
+**三个必答问题**：
+1. **What（做什么）**：这段代码实现了什么功能？
+   - 必须通过清晰的函数/模块命名和注释说明
+   - 复杂逻辑必须有文档说明
+
+2. **Why（为什么）**：为什么要这样做？为什么需要这个功能？
+   - 提交信息必须说明动机和背景
+   - 非显而易见的实现选择必须注释说明原因
+
+3. **Better（更好的方法）**：有没有更简单、更高效的实现方式？
+   - 代码审查者必须主动思考是否存在更好的方案
+   - 提交者必须说明为什么当前方案是合理选择
+
+**理由**：这三个问题强制开发者进行批判性思考，确保每一行代码都是深思熟虑的结果，而不是盲目编写。
+
+## 开发工作流
+
+### 代码提交规范
+
+**提交信息格式**：
+```
+<type>(<scope>): <subject>
+
+<body>
+
+<footer>
+```
+
+**Type类型**：
+- `feat`: 新功能
+- `fix`: Bug修复
+- `docs`: 文档更新
+- `refactor`: 重构（既不是新功能也不是bug修复）
+- `perf`: 性能优化
+- `test`: 测试相关
+- `chore`: 构建过程或辅助工具的变动
+
+**提交信息必须回答Linus三问**：
+- Subject: What - 做了什么
+- Body: Why - 为什么这样做，背景是什么
+- Footer: 更好的方案考虑（如适用）或相关issue引用
+
+### 架构决策
+
+所有重要的架构决策必须：
+1. 遵循KISS原则：首先考虑最简单的方案
+2. 遵循轮子复用原则：调研现有解决方案
+3. 通过Linus三问：明确做什么、为什么、是否有更好方案
+4. 记录在Architecture Decision Records (ADR)中
+
+## 代码审查流程
+
+### 审查检查清单
+
+每次代码审查必须验证：
+
+**KISS原则检查**：
+- [ ] 代码是否足够简单？
+- [ ] 是否存在不必要的抽象或复杂度？
+- [ ] 是否可以用更简单的方式实现？
+
+**轮子复用原则检查**：
+- [ ] 是否调研了现有解决方案？
+- [ ] 如果自己实现，理由是否充分？
+- [ ] 使用的第三方库是否合适？
+
+**Linus三问检查**：
+- [ ] 代码做什么是否清晰？（What）
+- [ ] 为什么这样做是否有文档说明？（Why）
+- [ ] 是否考虑了更好的实现方式？（Better）
+
+### 复杂度豁免
+
+如果代码违反了KISS原则（引入了复杂度），必须在PR中填写复杂度豁免表：
+
+| 复杂度类型 | 为什么需要 | 为什么更简单的方案不可行 |
+|-----------|------------|-------------------------|
+| [例如：自定义解析器] | [具体需求] | [为什么现有库不满足] |
+
+## 治理规则
+
+### 宪章地位
+
+- 本宪章优先级高于所有其他开发实践
+- 所有PR和代码审查必须验证符合宪章要求
+- 任何与宪章冲突的实践都必须修正
+
+### 宪章修订
+
+- 修订必须通过团队一致同意
+- 修订必须包含：变更说明、影响分析、迁移计划
+- 版本号遵循语义化版本规范：
+  - MAJOR：不兼容的原则移除或重新定义
+  - MINOR：新增原则或章节
+  - PATCH：澄清、措辞优化、非语义性改进
+
+### 合规审查
+
+- 每个sprint进行一次宪章合规审查
+- 发现违反宪章的代码必须创建技术债务issue跟踪
+- 严重违反宪章的代码必须立即修正
+
+**版本**: 1.0.0 | **批准日期**: 2025-10-14 | **最后修订**: 2025-10-14
