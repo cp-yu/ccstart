@@ -1,0 +1,87 @@
+{
+  "scan_info": {
+    "timestamp": "2025-10-15T11:22:48Z",
+    "total_files": 18,
+    "scanned_files": 18,
+    "coverage_percentage": 100,
+    "truncated": false
+  },
+  "modules": [
+    {
+      "path": "src/commands",
+      "type": "rust_module",
+      "language": "rust",
+      "entry_files": ["src/commands/mod.rs"],
+      "interface_files": ["src/commands/init.rs", "src/commands/run.rs", "src/commands/list.rs", "src/commands/completions.rs", "src/commands/update.rs"],
+      "test_files": [],
+      "config_files": [],
+      "responsibilities": "命令处理模块，实现所有CLI子命令的功能",
+      "claude_md_created": true
+    },
+    {
+      "path": "src/config",
+      "type": "rust_module",
+      "language": "rust",
+      "entry_files": ["src/config/mod.rs"],
+      "interface_files": ["src/config/manager.rs", "src/config/parser.rs"],
+      "test_files": [],
+      "config_files": [],
+      "responsibilities": "配置管理模块，负责解析和管理Claude配置文件",
+      "claude_md_created": true
+    },
+    {
+      "path": "src/utils",
+      "type": "rust_module",
+      "language": "rust",
+      "entry_files": ["src/utils/mod.rs"],
+      "interface_files": ["src/utils/fs.rs", "src/utils/encoding.rs"],
+      "test_files": [],
+      "config_files": [],
+      "responsibilities": "工具模块，提供文件系统和编码功能",
+      "claude_md_created": true
+    }
+  ],
+  "root_files": [
+    "src/main.rs",
+    "src/error.rs",
+    "Cargo.toml",
+    "README.md"
+  ],
+  "ignore_patterns": [
+    "target/**",
+    ".git/**",
+    ".DS_Store",
+    "Thumbs.db",
+    "*.tmp",
+    "*.swp",
+    ".vscode/**",
+    ".idea/**"
+  ],
+  "generated_documents": {
+    "root_claude_md": true,
+    "module_claude_mds": 3,
+    "index_json": true,
+    "architecture_diagram": true,
+    "navigation_breadcrumbs": true
+  },
+  "coverage_gaps": [],
+  "next_steps": [
+    "添加测试文件和测试策略",
+    "完善集成测试覆盖",
+    "考虑添加性能基准测试"
+  ],
+  "scan_summary": {
+    "project_type": "Rust CLI Application",
+    "primary_language": "Rust",
+    "architecture_pattern": "Modular CLI with clear separation of concerns",
+    "key_features": [
+      "Configuration management",
+      "Command-line interface",
+      "Shell completion support",
+      "Cross-platform compatibility"
+    ],
+    "total_modules": 3,
+    "total_source_files": 13,
+    "documentation_coverage": "Complete"
+  }
+}
