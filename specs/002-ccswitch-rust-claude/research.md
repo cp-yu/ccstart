@@ -237,7 +237,7 @@ fn decode_config_name(encoded: &str) -> Result<String, std::str::Utf8Error> {
 ```toml
 [package]
 name = "ccstart"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 
 [dependencies]

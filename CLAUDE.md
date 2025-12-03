@@ -194,6 +194,10 @@ cargo test <test_name>
 
 ## 更新日志
 
+### 2025-12-04 - v0.2.0 发布
+- 版本更新至 0.2.0
+- 文档版本同步更新
+
 ### 2025-12-03 - SQLite 迁移
 - 从 JSON 配置迁移到 SQLite 数据库
 - 实现 Read-Through Cache 架构

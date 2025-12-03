@@ -397,7 +397,7 @@ ccstart help [SUBCOMMAND]
 #### 输出
 
 ```
-ccstart 0.1.0
+ccstart 0.2.0
 Claude CLI 配置管理工具
 
 USAGE:
@@ -447,7 +447,7 @@ ccstart -V
 #### 输出
 
 ```
-ccstart 0.1.0
+ccstart 0.2.0
 ```
 
 ---
