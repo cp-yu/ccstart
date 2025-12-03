@@ -1,4 +1,5 @@
-use crate::config::manager::ConfigManager;
+use crate::config::cache::CacheManager;
+use crate::db::Database;
 use crate::error::AppResult;
 use anyhow::Context;
 #[cfg(unix)]
@@ -6,28 +7,35 @@ use std::os::unix::process::ExitStatusExt;
 use std::process::Command;
 
 pub fn run(name: &str, args: &[String]) -> AppResult<i32> {
-    let settings_path = match ConfigManager::find_config_file(name) {
-        Ok(p) => p,
-        Err(e) => {
-            eprintln!("错误: 未找到配置 '{}': {}", name, e);
-            if let Ok(list) = ConfigManager::list_configs() {
-                if list.is_empty() {
-                    eprintln!("提示: 先运行 'ccstart init' 生成分离配置。");
+    // 1. 打开数据库
+    let db = Database::open()?;
+
+    // 2. 查询 provider
+    let provider = match db.providers().get_by_name(name)? {
+        Some(p) => p,
+        None => {
+            eprintln!("错误: 未找到配置 '{}'", name);
+            if let Ok(names) = db.providers().list_names() {
+                if names.is_empty() {
+                    eprintln!("提示: 数据库中没有 Claude 配置，请先在 cc-switch 中添加。");
                 } else {
                     eprintln!("提示: 可用配置如下：");
-                    for n in list {
+                    for n in names {
                         eprintln!("  - {}", n);
                     }
                 }
-            } else {
-                eprintln!("提示: 先运行 'ccstart init' 生成分离配置，或检查名称是否正确。");
             }
             return Ok(1);
         }
     };
 
+    // 3. 确保缓存文件存在（懒加载 + 哈希比较）
+    let cache = CacheManager::new()?;
+    let settings_path = cache.ensure_cached(&provider)?;
+
     eprintln!("[INFO] 使用配置: {}", settings_path.display());
 
+    // 4. 执行 claude
     let mut cmd = Command::new("claude");
     cmd.arg("--settings").arg(&settings_path);
     for a in args {
@@ -41,18 +49,15 @@ pub fn run(name: &str, args: &[String]) -> AppResult<i32> {
     if let Some(code) = status.code() {
         Ok(code)
     } else {
-        // 子进程未返回常规退出码
         #[cfg(unix)]
         {
-            // Unix: 可能被信号终止
             let sig = status.signal().unwrap_or_default();
             eprintln!("[WARN] 进程被信号终止: {}", sig);
             Ok(128 + sig)
         }
         #[cfg(not(unix))]
         {
-            // Windows: 无信号概念，按失败处理
-            eprintln!("[WARN] 子进程未返回退出码（非 Unix 平台），按失败处理");
+            eprintln!("[WARN] 子进程未返回退出码，按失败处理");
             Ok(1)
         }
     }

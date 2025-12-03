@@ -1,3 +1,4 @@
 pub mod encoding;
-pub mod fs;
+
+// fs 模块已废弃（功能已迁移到 config/cache.rs）
 

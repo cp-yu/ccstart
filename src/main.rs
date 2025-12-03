@@ -1,5 +1,6 @@
 mod commands;
 mod config;
+mod db;
 mod error;
 mod utils;
 
@@ -9,16 +10,16 @@ use std::ffi::OsStr;
 
 #[derive(Debug, Parser)]
 #[command(
-    author, 
-    version, 
-    about = "ccstart - Claude Settings 配置管理工具", 
+    author,
+    version,
+    about = "ccstart - Claude Settings 配置管理工具 (SQLite 版)",
     long_about = None,
     after_help = "示例:\n  \
-        ccstart init                    # 初始化配置\n  \
         ccstart list                    # 列出所有配置\n  \
         ccstart packycode               # 使用 packycode 配置启动 Claude\n  \
         ccstart packycode \"help me\"     # 使用配置并传递参数\n  \
         ccstart \"Zhipu GLM\" \"你好\"      # 使用包含空格的配置名称\n  \
+        ccstart update                  # 强制刷新所有缓存\n  \
         ccstart completions bash        # 生成 bash 补全脚本\n\n  \
         提示: 推荐启用动态补全 (实时读取配置列表)\n  \
         Bash: echo \"source <(COMPLETE=bash ccstart)\" >> ~/.bashrc\n  \
@@ -42,17 +43,10 @@ struct Cli {
 
 #[derive(Debug, Subcommand)]
 enum Commands {
-    /// 初始化：从 ~/.cc-switch/config.json 分离出独立配置
-    Init {
-        /// 跳过覆盖确认
-        #[arg(long)]
-        force: bool,
-    },
-
     /// 列出所有可用的配置名称
     List,
 
-    /// 更新配置：重新同步 config.json 的变更到 separated/ 目录
+    /// 更新配置：强制刷新所有缓存文件
     Update,
 
     /// 生成 shell 补全脚本
@@ -77,17 +71,12 @@ pub fn build_cli_command() -> clap::Command { Cli::command() }
 
 /// 应用主入口：返回进程退出码
 fn run_app() -> error::AppResult<i32> {
-    // 在最开始拦截 shell 动态补全请求（由 clap_complete 通过环境变量触发），
-    // 若捕获到补全请求，内部将输出候选并直接 exit(0)。
+    // 在最开始拦截 shell 动态补全请求
     CompleteEnv::with_factory(Cli::command).complete();
 
     let cli = Cli::parse();
 
     let exit_code = match cli.command {
-        Some(Commands::Init { force }) => {
-            commands::init::run(force)?;
-            0
-        }
         Some(Commands::List) => {
             commands::list::list_configs()?;
             0
@@ -122,23 +111,24 @@ fn main() {
         Ok(code) => std::process::exit(code),
         Err(e) => {
             eprintln!("错误: {}", e);
-            eprintln!("提示: 使用 --help 查看用法，或先运行 'ccstart init' 初始化配置");
+            eprintln!("提示: 使用 --help 查看用法");
             std::process::exit(1);
         }
     }
 }
 
-/// 动态补全：返回配置名称候选
+/// 动态补全：返回配置名称候选（从 SQLite 查询）
 pub fn config_name_completer(current: &OsStr) -> Vec<clap_complete::engine::CompletionCandidate> {
     let mut out = Vec::new();
 
-    // 当前输入（尽力解码为 UTF-8）；无法解码则返回所有候选
     let needle = current.to_string_lossy().to_string();
     let lower = needle.to_lowercase();
 
-    if let Ok(list) = crate::config::manager::ConfigManager::list_configs() {
-        for name in list {
-            // 不区分大小写前缀匹配；空输入返回全部
+    // 从 SQLite 查询
+    if let Ok(db) = crate::db::Database::open()
+        && let Ok(names) = db.providers().list_names()
+    {
+        for name in names {
             if lower.is_empty() || name.to_lowercase().starts_with(&lower) {
                 out.push(clap_complete::engine::CompletionCandidate::new(name));
             }

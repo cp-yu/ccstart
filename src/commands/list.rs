@@ -1,19 +1,18 @@
-use crate::config::manager::ConfigManager;
+use crate::db::Database;
 use crate::error::AppResult;
 
-/// 列出所有可用的配置名称
+/// 列出所有可用的配置名称（从 SQLite 查询）
 pub fn list_configs() -> AppResult<()> {
-    let configs = ConfigManager::list_configs()?;
+    let db = Database::open()?;
+    let names = db.providers().list_names()?;
 
-    if configs.is_empty() {
-        eprintln!("错误: 未找到配置");
-        eprintln!("提示: 请先运行 'ccstart init' 初始化配置");
+    if names.is_empty() {
+        eprintln!("错误: 数据库中没有 Claude 配置");
+        eprintln!("提示: 请先在 cc-switch 中添加配置");
         std::process::exit(1);
     }
 
-    // 输出到 stdout，每行一个配置名称
-    // 包含空格或特殊字符的名称使用双引号包裹
-    for name in configs {
+    for name in names {
         if needs_quoting(&name) {
             println!("\"{}\"", name);
         } else {
