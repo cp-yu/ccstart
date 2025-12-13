@@ -1,3 +1,4 @@
+use crate::config::diff::{diff_top_level_fields, CacheResult};
 use crate::db::Provider;
 use crate::error::AppResult;
 use crate::utils::encoding::encode_config_name;
@@ -26,36 +27,33 @@ impl CacheManager {
         self.cache_dir.join(format!("config-{}.json", encoded))
     }
 
-    /// 确保缓存文件存在且是最新的，返回文件路径
+    /// 确保缓存文件存在且是最新的，返回缓存操作结果
     /// 使用内容哈希比较，只在内容变化时才重新写入
-    pub fn ensure_cached(&self, provider: &Provider) -> AppResult<PathBuf> {
+    pub fn ensure_cached(&self, provider: &Provider) -> AppResult<CacheResult> {
         let path = self.get_cache_path(&provider.name);
         let content = serde_json::to_vec_pretty(&provider.settings_config)
             .with_context(|| "序列化配置失败")?;
         let new_hash = Self::hash_content(&content);
 
-        let should_write = if path.exists() {
+        if path.exists() {
             let existing = fs::read(&path).with_context(|| "读取缓存文件失败")?;
             let existing_hash = Self::hash_content(&existing);
-            new_hash != existing_hash
-        } else {
-            true
-        };
 
-        if should_write {
+            if new_hash == existing_hash {
+                return Ok(CacheResult::Unchanged(path));
+            }
+
+            // 解析旧内容进行字段比较
+            let old_value: serde_json::Value = serde_json::from_slice(&existing)
+                .with_context(|| "解析旧缓存失败")?;
+            let changed_fields = diff_top_level_fields(&old_value, &provider.settings_config);
+
             self.write_atomic(&path, &content)?;
+            Ok(CacheResult::Updated { path, changed_fields })
+        } else {
+            self.write_atomic(&path, &content)?;
+            Ok(CacheResult::Created(path))
         }
-
-        Ok(path)
-    }
-
-    /// 强制写入缓存文件（用于 update 命令）
-    pub fn force_write(&self, provider: &Provider) -> AppResult<PathBuf> {
-        let path = self.get_cache_path(&provider.name);
-        let content = serde_json::to_vec_pretty(&provider.settings_config)
-            .with_context(|| "序列化配置失败")?;
-        self.write_atomic(&path, &content)?;
-        Ok(path)
     }
 
     /// 删除指定名称的缓存文件

@@ -1,8 +1,9 @@
 use crate::config::cache::CacheManager;
+use crate::config::diff::CacheResult;
 use crate::db::Database;
 use crate::error::AppResult;
 
-/// 更新配置：强制刷新所有缓存文件
+/// 更新配置：同步所有缓存文件并显示变更详情
 pub fn run() -> AppResult<()> {
     eprintln!("[INFO] 正在从数据库同步配置...");
 
@@ -18,14 +19,28 @@ pub fn run() -> AppResult<()> {
         return Ok(());
     }
 
-    // 3. 强制写入所有缓存
+    // 3. 同步缓存并显示变更详情
     let cache = CacheManager::new()?;
-    let mut write_count = 0;
+    let mut created_count = 0;
+    let mut updated_count = 0;
+    let mut unchanged_count = 0;
 
     for provider in &providers {
-        let path = cache.force_write(provider)?;
-        eprintln!("✓ 写入: {} -> {}", provider.name, path.display());
-        write_count += 1;
+        let result = cache.ensure_cached(provider)?;
+        match result {
+            CacheResult::Created(path) => {
+                eprintln!("✓ 新增: {} -> {}", provider.name, path.display());
+                created_count += 1;
+            }
+            CacheResult::Updated { path, changed_fields } => {
+                let fields = changed_fields.join(", ");
+                eprintln!("✓ 更新: {} ({}) -> {}", provider.name, fields, path.display());
+                updated_count += 1;
+            }
+            CacheResult::Unchanged(_) => {
+                unchanged_count += 1;
+            }
+        }
     }
 
     // 4. 清理过期缓存
@@ -35,8 +50,10 @@ pub fn run() -> AppResult<()> {
     }
 
     eprintln!(
-        "[INFO] 配置更新完成！写入 {} 个，删除 {} 个",
-        write_count,
+        "[INFO] 配置同步完成！新增 {}，更新 {}，未变 {}，删除 {}",
+        created_count,
+        updated_count,
+        unchanged_count,
         removed.len()
     );
 

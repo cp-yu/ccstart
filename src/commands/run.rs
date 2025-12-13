@@ -1,4 +1,5 @@
 use crate::config::cache::CacheManager;
+use crate::config::diff::CacheResult;
 use crate::db::Database;
 use crate::error::AppResult;
 use anyhow::Context;
@@ -31,13 +32,28 @@ pub fn run(name: &str, args: &[String]) -> AppResult<i32> {
 
     // 3. 确保缓存文件存在（懒加载 + 哈希比较）
     let cache = CacheManager::new()?;
-    let settings_path = cache.ensure_cached(&provider)?;
+    let result = cache.ensure_cached(&provider)?;
 
-    eprintln!("[INFO] 使用配置: {}", settings_path.display());
+    // 4. 显示缓存状态反馈
+    match &result {
+        CacheResult::Created(path) => {
+            eprintln!("[INFO] 新配置已缓存: {}", provider.name);
+            eprintln!("[INFO] 使用配置: {}", path.display());
+        }
+        CacheResult::Updated { path, changed_fields } => {
+            let fields = changed_fields.join(", ");
+            eprintln!("[INFO] 配置已更新: {} ({} 已变更)", provider.name, fields);
+            eprintln!("[INFO] 使用配置: {}", path.display());
+        }
+        CacheResult::Unchanged(path) => {
+            eprintln!("[INFO] 使用配置: {}", path.display());
+        }
+    }
 
-    // 4. 执行 claude
+    // 5. 执行 claude
+    let settings_path = result.path();
     let mut cmd = Command::new("claude");
-    cmd.arg("--settings").arg(&settings_path);
+    cmd.arg("--settings").arg(settings_path);
     for a in args {
         cmd.arg(a);
     }

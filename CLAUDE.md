@@ -1,7 +1,7 @@
 # ccstart 项目 AI 上下文文档
 
 > ccstart - Claude Code 快速启动工具，用于管理不同项目的 Claude 配置
-> 更新时间：2025-12-03
+> 更新时间：2025-12-13
 
 ## 项目愿景
 
@@ -25,6 +25,7 @@ graph TD
     D --> L["update.rs"];
 
     E --> M["cache.rs"];
+    E --> Ma["diff.rs"];
 
     F --> N["mod.rs"];
     F --> O["provider.rs"];
@@ -62,7 +63,7 @@ graph TD
 | **主入口** | `src/main.rs` | CLI 程序入口、参数解析、命令分发 | `main.rs` |
 | **数据库** | `src/db/` | SQLite 只读访问，Provider DAO | `mod.rs`, `provider.rs` |
 | **命令处理** | `src/commands/` | 实现所有子命令功能 | `run.rs`, `list.rs`, `completions.rs`, `update.rs` |
-| **缓存管理** | `src/config/` | Read-Through Cache，哈希比较 | `cache.rs` |
+| **缓存管理** | `src/config/` | Read-Through Cache，哈希比较，字段级 diff | `cache.rs`, `diff.rs` |
 | **工具模块** | `src/utils/` | 配置名称编码工具 | `encoding.rs` |
 | **错误处理** | `src/error.rs` | 统一错误类型定义 | `error.rs` |
 
@@ -193,6 +194,13 @@ cargo test <test_name>
 - 工作流会上传构建产物与对应的 `SHA256` 校验文件，并自动创建 Release。
 
 ## 更新日志
+
+### 2025-12-13 - 自动更新与字段级 diff
+- 新增 `src/config/diff.rs` 模块，实现 JSON 字段级差异比较
+- `ensure_cached()` 返回 `CacheResult` 枚举，区分 Unchanged/Created/Updated
+- `ccstart <name>` 自动检测数据库变化并更新缓存，显示变更字段
+- `ccstart update` 改为智能同步，显示新增/更新/未变/删除的详细统计
+- 移除 `force_write()` 方法（不再需要强制写入）
 
 ### 2025-12-04 - v0.2.0 发布
 - 版本更新至 0.2.0
