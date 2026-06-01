@@ -11,7 +11,7 @@ pub fn run() -> AppResult<()> {
     let db = Database::open()?;
 
     // 2. 获取所有 provider
-    let providers = db.providers().list_all()?;
+    let providers = db.providers().list_all("claude")?;
     let valid_names: Vec<String> = providers.iter().map(|p| p.name.clone()).collect();
 
     if providers.is_empty() {

@@ -12,11 +12,11 @@ pub fn run(name: &str, args: &[String]) -> AppResult<i32> {
     let db = Database::open()?;
 
     // 2. 查询 provider
-    let provider = match db.providers().get_by_name(name)? {
+    let provider = match db.providers().get_by_name("claude", name)? {
         Some(p) => p,
         None => {
             eprintln!("错误: 未找到配置 '{}'", name);
-            if let Ok(names) = db.providers().list_names() {
+            if let Ok(names) = db.providers().list_names("claude") {
                 if names.is_empty() {
                     eprintln!("提示: 数据库中没有 Claude 配置，请先在 cc-switch 中添加。");
                 } else {
