@@ -1,16 +1,4 @@
-# Spec: provider
-
-## Purpose
-
-约束 ccstart 对 cc-switch provider 数据库的只读访问和查询结果。
-## Requirements
-### Requirement: Read-only database access
-The system SHALL open the cc-switch SQLite database in read-only mode before querying provider data.
-
-#### Scenario: Database path is resolved
-- **GIVEN** a user invokes a command that needs provider data
-- **WHEN** the database layer opens the cc-switch database
-- **THEN** it uses the home-directory cc-switch database path with read-only SQLite flags
+## MODIFIED Requirements
 
 ### Requirement: Claude provider queries
 系统 SHALL 在 `ProviderDao` 的 `list_all`、`get_by_name`、`list_names` 方法中接受 `app_type` 参数，返回指定类型的 provider 并保持配置的排序。

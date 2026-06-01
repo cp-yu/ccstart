@@ -4,7 +4,7 @@ use crate::error::AppResult;
 /// 列出所有可用的配置名称（从 SQLite 查询）
 pub fn list_configs() -> AppResult<()> {
     let db = Database::open()?;
-    let names = db.providers().list_names()?;
+    let names = db.providers().list_names("claude")?;
 
     if names.is_empty() {
         eprintln!("错误: 数据库中没有 Claude 配置");

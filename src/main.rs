@@ -49,6 +49,17 @@ enum Commands {
     /// 更新配置：强制刷新所有缓存文件
     Update,
 
+    /// 使用 Codex 渠道启动 codex；`ccstart codex list` 列出渠道
+    #[command(disable_help_flag = true)]
+    Codex {
+        /// Codex 渠道名称
+        #[arg(add = clap_complete::engine::ArgValueCompleter::new(crate::codex_channel_completer))]
+        channel: Option<String>,
+        /// 透传给 `codex` 的参数
+        #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
+        args: Vec<String>,
+    },
+
     /// 生成 shell 补全脚本
     Completions {
         /// Shell 类型 (bash, zsh, fish, powershell, elvish)
@@ -85,6 +96,18 @@ fn run_app() -> error::AppResult<i32> {
             commands::update::run()?;
             0
         }
+        Some(Commands::Codex { channel, args }) => match channel.as_deref() {
+            Some("list") if args.is_empty() => {
+                commands::codex::list_channels()?;
+                0
+            }
+            Some(channel) => commands::codex::run(channel, &args)?,
+            None => {
+                Cli::command().print_help().ok();
+                println!();
+                0
+            }
+        },
         Some(Commands::Completions { shell }) => {
             commands::completions::run(shell)?;
             0
@@ -126,7 +149,27 @@ pub fn config_name_completer(current: &OsStr) -> Vec<clap_complete::engine::Comp
 
     // 从 SQLite 查询
     if let Ok(db) = crate::db::Database::open()
-        && let Ok(names) = db.providers().list_names()
+        && let Ok(names) = db.providers().list_names("claude")
+    {
+        for name in names {
+            if lower.is_empty() || name.to_lowercase().starts_with(&lower) {
+                out.push(clap_complete::engine::CompletionCandidate::new(name));
+            }
+        }
+    }
+
+    out
+}
+
+/// 动态补全：返回 Codex 渠道候选（从 SQLite 查询）
+pub fn codex_channel_completer(current: &OsStr) -> Vec<clap_complete::engine::CompletionCandidate> {
+    let mut out = Vec::new();
+
+    let needle = current.to_string_lossy().to_string();
+    let lower = needle.to_lowercase();
+
+    if let Ok(db) = crate::db::Database::open()
+        && let Ok(names) = db.providers().list_names("codex")
     {
         for name in names {
             if lower.is_empty() || name.to_lowercase().starts_with(&lower) {

@@ -4,30 +4,38 @@ project:
   name: ccstart
 domains:
   - id: dom.cache
-    type: domain
     intent: 维护 Claude settings 的 read-through cache、内容哈希比较、字段级 diff 和过期缓存清理。
     status: active
+    type: domain
     boundary: src/config/ and src/utils/encoding.rs own cache file naming, JSON serialization, hash comparison, atomic writes, diff reporting, and stale cache cleanup.
   - id: dom.cli
-    type: domain
     intent: 命令行入口、参数解析、子命令分发和 shell 补全输出。
     status: active
+    type: domain
     boundary: src/main.rs 和 src/commands/ 负责用户命令表面，不直接持久化 provider 数据。
   - id: dom.provider
-    type: domain
     intent: 以只读方式访问 cc-switch SQLite provider 数据并提供 Claude 配置查询。
     status: active
+    type: domain
     boundary: src/db/ owns database location, read-only connections, Provider rows, and Claude provider query ordering.
 capabilities:
   - id: cap.cache.sync
-    type: capability
     intent: 将 provider settings_config 同步到按名称编码的缓存文件，并报告新增、更新、未变和删除状态。
     status: active
-  - id: cap.cli.dispatch
     type: capability
+  - id: cap.cli.dispatch
     intent: 解析 ccstart 参数并分发 list、update、completions、run 和默认配置启动路径。
     status: active
-  - id: cap.provider.query
     type: capability
-    intent: 打开 cc-switch SQLite 数据库并查询 app_type 为 claude 的 provider 配置。
+  - id: cap.provider.query
+    intent: 打开 cc-switch SQLite 数据库并按 app_type 参数查询 provider 配置（支持 claude 和 codex）。
     status: active
+    type: capability
+  - id: cap.codex.dispatch
+    intent: 接受 ccstart codex <channel> [args...] 调用，从 cc-switch 数据库查询 codex provider 并通过运行时注入（env + -c）非破坏性启动 codex 进程。
+    status: active
+    type: capability
+  - id: cap.codex.completion
+    intent: 为 codex 子命令的 channel 参数提供 shell 动态自动补全，候选值从数据库 app_type='codex' 实时查询。
+    status: active
+    type: capability

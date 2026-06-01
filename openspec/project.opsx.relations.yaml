@@ -18,3 +18,15 @@ relations:
   - from: cap.provider.query
     type: contains
     to: dom.provider
+  - from: cap.codex.dispatch
+    type: contains
+    to: dom.cli
+  - from: cap.codex.dispatch
+    type: depends_on
+    to: dom.provider
+  - from: cap.codex.completion
+    type: contains
+    to: dom.cli
+  - from: cap.codex.completion
+    type: depends_on
+    to: dom.provider
