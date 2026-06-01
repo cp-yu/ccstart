@@ -6,6 +6,8 @@ use std::os::unix::process::ExitStatusExt;
 use std::process::Command;
 use toml::Value;
 
+const AUTH_ENV_KEY: &str = "OPENAI_API_KEY";
+
 #[derive(Debug)]
 struct CodexConfig {
     api_key: String,
@@ -58,19 +60,7 @@ pub fn run(channel: &str, args: &[String]) -> AppResult<i32> {
     let config = parse_settings_config(&provider.settings_config)?;
 
     let mut cmd = Command::new("codex");
-    cmd.env("OPENAI_API_KEY", config.api_key)
-        .arg("-c")
-        .arg(format!(
-            "model_providers.{}.base_url={}",
-            config.model_provider,
-            toml_string(&config.base_url)
-        ))
-        .arg("-c")
-        .arg(format!("model={}", toml_string(&config.model)));
-
-    for a in args {
-        cmd.arg(a);
-    }
+    configure_command(&mut cmd, &config, args);
 
     let status = cmd
         .status()
@@ -90,6 +80,38 @@ pub fn run(channel: &str, args: &[String]) -> AppResult<i32> {
             eprintln!("[WARN] 子进程未返回退出码，按失败处理");
             Ok(1)
         }
+    }
+}
+
+fn configure_command(cmd: &mut Command, config: &CodexConfig, args: &[String]) {
+    cmd.env(AUTH_ENV_KEY, &config.api_key)
+        .arg("-c")
+        .arg(format!(
+            "model_provider={}",
+            toml_string(&config.model_provider)
+        ))
+        .arg("-c")
+        .arg(format!(
+            "model_providers.{}.base_url={}",
+            config.model_provider,
+            toml_string(&config.base_url)
+        ))
+        .arg("-c")
+        .arg(format!(
+            "model_providers.{}.env_key={}",
+            config.model_provider,
+            toml_string(AUTH_ENV_KEY)
+        ))
+        .arg("-c")
+        .arg(format!(
+            "model_providers.{}.requires_openai_auth=false",
+            config.model_provider
+        ))
+        .arg("-c")
+        .arg(format!("model={}", toml_string(&config.model)));
+
+    for a in args {
+        cmd.arg(a);
     }
 }
 
@@ -160,8 +182,9 @@ fn toml_string(value: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::parse_settings_config;
+    use super::{configure_command, parse_settings_config, CodexConfig, AUTH_ENV_KEY};
     use serde_json::json;
+    use std::process::Command;
 
     #[test]
     fn parses_standard_config() {
@@ -203,5 +226,40 @@ model = "gpt-5.5"
         let err = parse_settings_config(&settings).unwrap_err().to_string();
 
         assert!(err.contains("model_providers.custom.base_url"));
+    }
+
+    #[test]
+    fn configures_provider_auth_from_env() {
+        let config = CodexConfig {
+            api_key: "key".to_owned(),
+            model_provider: "custom".to_owned(),
+            model: "gpt-5.5".to_owned(),
+            base_url: "https://example.com/v1".to_owned(),
+        };
+        let args = vec!["--help".to_owned()];
+        let mut cmd = Command::new("codex");
+
+        configure_command(&mut cmd, &config, &args);
+
+        let arg_strings = cmd
+            .get_args()
+            .map(|a| a.to_string_lossy().into_owned())
+            .collect::<Vec<_>>();
+
+        assert_eq!(
+            cmd.get_envs()
+                .find(|(k, _)| k.to_string_lossy() == AUTH_ENV_KEY)
+                .unwrap()
+                .1,
+            Some("key".as_ref())
+        );
+        assert!(arg_strings.contains(&"model_provider=\"custom\"".to_owned()));
+        assert!(
+            arg_strings.contains(&"model_providers.custom.env_key=\"OPENAI_API_KEY\"".to_owned())
+        );
+        assert!(
+            arg_strings.contains(&"model_providers.custom.requires_openai_auth=false".to_owned())
+        );
+        assert!(arg_strings.contains(&"--help".to_owned()));
     }
 }
