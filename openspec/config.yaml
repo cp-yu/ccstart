@@ -31,7 +31,7 @@ optimization:
 #   apply:
 #     defaultIsolation: ask  # ask / branch / worktree / none
 apply:
-  defaultIsolation: ask  # ask / branch / worktree / none
+  defaultIsolation: branch # ask / branch / worktree / none
 
 # Git archive and merge policy (optional)
 # Example:

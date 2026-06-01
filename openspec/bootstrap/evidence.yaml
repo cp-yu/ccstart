@@ -1,0 +1,27 @@
+domains:
+  - id: dom.cli
+    confidence: high
+    sources:
+      - doc:README.md
+      - code:src/main.rs
+      - code:src/commands/
+      - config:Cargo.toml
+    intent: 命令行入口、参数解析、子命令分发和 shell 补全输出。
+  - id: dom.provider
+    confidence: high
+    sources:
+      - doc:README.md
+      - code:src/db/
+      - code:src/db/provider.rs
+      - config:Cargo.toml
+    intent: 以只读方式访问 cc-switch SQLite provider 数据并提供 Claude 配置查询。
+  - id: dom.cache
+    confidence: high
+    sources:
+      - doc:README.md
+      - code:src/config/
+      - code:src/utils/encoding.rs
+      - code:src/commands/run.rs
+      - code:src/commands/update.rs
+      - config:Cargo.toml
+    intent: 维护 Claude settings 的 read-through cache、内容哈希比较、字段级 diff 和过期缓存清理。

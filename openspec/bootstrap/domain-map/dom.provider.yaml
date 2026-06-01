@@ -1,0 +1,58 @@
+domain:
+  id: dom.provider
+  type: domain
+  intent: 以只读方式访问 cc-switch SQLite provider 数据并提供 Claude 配置查询。
+  status: active
+  boundary: src/db/ owns database location, read-only connections, Provider rows, and Claude provider query ordering.
+capabilities:
+  - id: cap.provider.query
+    type: capability
+    intent: 打开 cc-switch SQLite 数据库并查询 app_type 为 claude 的 provider 配置。
+    status: active
+    spec:
+      folder: provider
+      purpose: 约束 ccstart 对 cc-switch provider 数据库的只读访问和查询结果。
+      requirements:
+        - title: Read-only database access
+          text: The system SHALL open the cc-switch SQLite database in read-only mode before querying provider data.
+          scenarios:
+            - title: Database path is resolved
+              steps:
+                - keyword: GIVEN
+                  text: a user invokes a command that needs provider data
+                - keyword: WHEN
+                  text: the database layer opens the cc-switch database
+                - keyword: THEN
+                  text: it uses the home-directory cc-switch database path with read-only SQLite flags
+        - title: Claude provider queries
+          text: The system SHALL return only providers whose app_type is claude and preserve configured ordering.
+          scenarios:
+            - title: Provider names are listed
+              steps:
+                - keyword: GIVEN
+                  text: the providers table contains multiple app types
+                - keyword: WHEN
+                  text: ccstart requests provider names
+                - keyword: THEN
+                  text: only Claude provider names are returned in sort_index and name order
+relations:
+  - from: cap.provider.query
+    to: dom.provider
+    type: contains
+code_refs:
+  - id: dom.provider
+    refs:
+      - path: src/db
+        line_start: 1
+  - id: cap.provider.query
+    refs:
+      - path: src/db/mod.rs
+        line_start: 15
+      - path: src/db/mod.rs
+        line_start: 32
+      - path: src/db/provider.rs
+        line_start: 27
+      - path: src/db/provider.rs
+        line_start: 54
+      - path: src/db/provider.rs
+        line_start: 81

@@ -1,0 +1,66 @@
+domain:
+  id: dom.cli
+  type: domain
+  intent: 命令行入口、参数解析、子命令分发和 shell 补全输出。
+  status: active
+  boundary: src/main.rs 和 src/commands/ 负责用户命令表面，不直接持久化 provider 数据。
+capabilities:
+  - id: cap.cli.dispatch
+    type: capability
+    intent: 解析 ccstart 参数并分发 list、update、completions、run 和默认配置启动路径。
+    status: active
+    spec:
+      folder: cli
+      purpose: 定义 ccstart 的命令行入口、子命令行为和动态补全接口。
+      requirements:
+        - title: Command dispatch
+          text: The system SHALL parse ccstart arguments and dispatch each supported command to its owning handler.
+          scenarios:
+            - title: Named configuration dispatches to run
+              steps:
+                - keyword: GIVEN
+                  text: a user provides a configuration name without an explicit subcommand
+                - keyword: WHEN
+                  text: the CLI parses the invocation
+                - keyword: THEN
+                  text: it calls the run handler with the configuration name and trailing arguments
+        - title: Completion candidates
+          text: The system SHALL expose provider names as dynamic completion candidates when the database is available.
+          scenarios:
+            - title: Completion filters by prefix
+              steps:
+                - keyword: GIVEN
+                  text: provider names are available from the database
+                - keyword: WHEN
+                  text: shell completion requests candidates for a partial prefix
+                - keyword: THEN
+                  text: matching provider names are returned as completion candidates
+relations:
+  - from: cap.cli.dispatch
+    to: dom.cli
+    type: contains
+  - from: cap.cli.dispatch
+    to: dom.provider
+    type: depends_on
+  - from: cap.cli.dispatch
+    to: dom.cache
+    type: depends_on
+code_refs:
+  - id: dom.cli
+    refs:
+      - path: src/main.rs
+        line_start: 1
+      - path: src/commands
+        line_start: 1
+  - id: cap.cli.dispatch
+    refs:
+      - path: src/main.rs
+        line_start: 11
+      - path: src/main.rs
+        line_start: 72
+      - path: src/main.rs
+        line_start: 120
+      - path: src/commands/list.rs
+        line_start: 1
+      - path: src/commands/completions.rs
+        line_start: 1

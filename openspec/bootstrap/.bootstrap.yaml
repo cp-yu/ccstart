@@ -1,0 +1,10 @@
+phase: promote
+baseline_type: formal-opsx
+mode: refresh
+created_at: 2026-06-01T03:57:36.561Z
+completed_at: 2026-06-01T04:10:29.133Z
+source_fingerprint: 0d319880ba6316864a47de070fdea66dd724071e2ddfda9509ab1d3d5c89a865
+candidate_fingerprint: e6208bb59546ec8f9b95e228b97f00dc98a88ffa9f40076f25307446b34f7a14
+review_fingerprint: e6208bb59546ec8f9b95e228b97f00dc98a88ffa9f40076f25307446b34f7a14
+refresh_anchor_commit: e2422f467b68f63ae01b97e709d582e446f77bfc
+candidate_spec_paths: []

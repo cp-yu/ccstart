@@ -1,0 +1,84 @@
+domain:
+  id: dom.cache
+  type: domain
+  intent: 维护 Claude settings 的 read-through cache、内容哈希比较、字段级 diff 和过期缓存清理。
+  status: active
+  boundary: src/config/ and src/utils/encoding.rs own cache file naming, JSON serialization, hash comparison, atomic writes, diff reporting, and stale cache cleanup.
+capabilities:
+  - id: cap.cache.sync
+    type: capability
+    intent: 将 provider settings_config 同步到按名称编码的缓存文件，并报告新增、更新、未变和删除状态。
+    status: active
+    spec:
+      folder: cache
+      purpose: 约束 Claude settings 缓存的生成、更新、差异报告和清理行为。
+      requirements:
+        - title: Read-through cache freshness
+          text: The system SHALL ensure each selected provider has a current cache file before launching Claude.
+          scenarios:
+            - title: Cache is created or reused
+              steps:
+                - keyword: GIVEN
+                  text: a selected provider has settings_config data
+                - keyword: WHEN
+                  text: ccstart prepares the provider for Claude
+                - keyword: THEN
+                  text: it writes a cache file when missing and reuses it when the content hash is unchanged
+        - title: Field-level update reporting
+          text: The system SHALL report top-level JSON fields that changed when an existing cache file is updated.
+          scenarios:
+            - title: Updated cache reports changed fields
+              steps:
+                - keyword: GIVEN
+                  text: an existing cache file differs from provider settings_config
+                - keyword: WHEN
+                  text: the cache manager refreshes the file
+                - keyword: THEN
+                  text: it returns the cache path and the changed top-level fields
+        - title: Stale cache cleanup
+          text: The system SHALL remove cached configuration files whose decoded names are no longer present in the provider list.
+          scenarios:
+            - title: Update removes stale files
+              steps:
+                - keyword: GIVEN
+                  text: a cache file exists for a provider name absent from the database result
+                - keyword: WHEN
+                  text: ccstart update completes synchronization
+                - keyword: THEN
+                  text: the stale cache file is removed and reported
+relations:
+  - from: cap.cache.sync
+    to: dom.cache
+    type: contains
+  - from: cap.cache.sync
+    to: dom.provider
+    type: depends_on
+code_refs:
+  - id: dom.cache
+    refs:
+      - path: src/config
+        line_start: 1
+      - path: src/utils/encoding.rs
+        line_start: 1
+  - id: cap.cache.sync
+    refs:
+      - path: src/config/cache.rs
+        line_start: 15
+      - path: src/config/cache.rs
+        line_start: 30
+      - path: src/config/cache.rs
+        line_start: 59
+      - path: src/config/cache.rs
+        line_start: 68
+      - path: src/config/cache.rs
+        line_start: 93
+      - path: src/config/diff.rs
+        line_start: 5
+      - path: src/config/diff.rs
+        line_start: 28
+      - path: src/utils/encoding.rs
+        line_start: 16
+      - path: src/commands/run.rs
+        line_start: 33
+      - path: src/commands/update.rs
+        line_start: 22
