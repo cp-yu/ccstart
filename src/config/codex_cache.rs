@@ -21,6 +21,22 @@ impl CodexCacheResult {
     }
 }
 
+/// RAII guard：持有 auth.json 锁，drop 时还原原始内容
+pub struct AuthGuard {
+    auth_path: PathBuf,
+    original: Option<Vec<u8>>,
+    _lock: fs::File,
+}
+
+impl Drop for AuthGuard {
+    fn drop(&mut self) {
+        match &self.original {
+            Some(orig) => { let _ = fs::write(&self.auth_path, orig); }
+            None => { let _ = fs::remove_file(&self.auth_path); }
+        }
+    }
+}
+
 /// Codex profile 缓存管理器
 pub struct CodexCacheManager {
     codex_dir: PathBuf,
@@ -44,6 +60,33 @@ impl CodexCacheManager {
     pub fn profile_path(&self, channel: &str) -> PathBuf {
         let name = Self::profile_name(channel);
         self.codex_dir.join(format!("{}.config.toml", name))
+    }
+
+    /// 获取 auth.json 独占锁，写入 api_key，返回 RAII guard
+    /// guard drop 时还原原始内容并释放锁；并发调用会阻塞等待
+    pub fn lock_and_write_auth(&self, api_key: &str) -> AppResult<AuthGuard> {
+        fs::create_dir_all(&self.codex_dir)
+            .with_context(|| format!("创建 codex 目录失败: {}", self.codex_dir.display()))?;
+
+        let lock_path = self.codex_dir.join(".ccstart-auth.lock");
+        let lock_file = fs::OpenOptions::new()
+            .write(true)
+            .create(true)
+            .open(&lock_path)
+            .with_context(|| "打开 auth 锁文件失败")?;
+        lock_file.lock().with_context(|| "获取 auth 文件锁失败")?;
+
+        let auth_path = self.codex_dir.join("auth.json");
+        let original = if auth_path.exists() {
+            Some(fs::read(&auth_path).with_context(|| "读取原始 auth.json 失败")?)
+        } else {
+            None
+        };
+
+        let content = format!("{{\"OPENAI_API_KEY\":\"{}\"}}\n", api_key);
+        fs::write(&auth_path, content.as_bytes()).with_context(|| "写入 auth.json 失败")?;
+
+        Ok(AuthGuard { auth_path, original, _lock: lock_file })
     }
 
     /// 确保 profile 文件存在且内容最新

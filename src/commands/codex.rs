@@ -76,6 +76,7 @@ pub fn run(channel: &str, args: &[String]) -> AppResult<i32> {
 
     let cache = CodexCacheManager::new()?;
     cache.ensure_cached(&resolved_name, toml_content)?;
+    let auth_guard = cache.lock_and_write_auth(api_key)?;
     let profile_name = CodexCacheManager::profile_name(&resolved_name);
 
     let mut cmd = Command::new("codex");
@@ -86,9 +87,15 @@ pub fn run(channel: &str, args: &[String]) -> AppResult<i32> {
         cmd.arg(a);
     }
 
-    let status = cmd
-        .status()
+    let mut child = cmd
+        .spawn()
         .with_context(|| "执行 'codex' 命令失败，请确认已安装并在 PATH 中")?;
+
+    // codex 启动后约 1s 内完成 auth.json 读取，随后还原文件并释放锁
+    std::thread::sleep(std::time::Duration::from_secs(1));
+    drop(auth_guard);
+
+    let status = child.wait().with_context(|| "等待 codex 进程失败")?;
 
     if let Some(code) = status.code() {
         Ok(code)
