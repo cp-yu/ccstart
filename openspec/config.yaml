@@ -44,7 +44,6 @@ apply:
 git:
   merge:
     strategy: no-ff
-    messageFrom: artifacts
   branch:
     deleteAfterArchive: false
 
