@@ -1,4 +1,5 @@
 pub mod codex;
+pub mod codex_resolve;
 pub mod completions;
 pub mod list;
 pub mod run;

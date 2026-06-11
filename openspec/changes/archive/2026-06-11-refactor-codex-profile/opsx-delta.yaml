@@ -1,0 +1,31 @@
+schema_version: 1
+ADDED:
+  capabilities:
+    - id: cap.codex.profile-cache
+      type: capability
+      intent: 将 codex channel 的完整 TOML 配置写入 ~/.codex/ 下的 profile 文件，使用 Read-Through Cache 策略和内容哈希比较。
+    - id: cap.codex.pinyin-resolve
+      type: capability
+      intent: 支持拼音首字母模糊匹配中文渠道名称，唯一命中时自动解析，碰撞时列出候选。
+    - id: cap.cli.cxstart-alias
+      type: capability
+      intent: 通过 argv[0] 检测提供 cxstart 快捷入口，隐含 codex 子命令语义。
+  relations:
+    - from: cap.codex.profile-cache
+      type: contains
+      to: dom.cache
+    - from: cap.codex.pinyin-resolve
+      type: contains
+      to: dom.cli
+    - from: cap.cli.cxstart-alias
+      type: contains
+      to: dom.cli
+
+MODIFIED:
+  capabilities:
+    - id: cap.codex.dispatch
+      intent: 接受 ccstart codex <channel> [args...] 调用，通过 profile 文件 (-p) 非破坏性启动 codex 进程，替代逐字段 -c 注入。
+    - id: cap.codex.completion
+      intent: 为 codex 子命令的 channel 参数提供 shell 动态自动补全，同时支持拼音首字母前缀匹配。
+
+REMOVED: {}
