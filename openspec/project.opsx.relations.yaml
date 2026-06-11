@@ -30,3 +30,9 @@ relations:
   - from: cap.codex.completion
     type: depends_on
     to: dom.provider
+  - from: dom.tui
+    type: contains
+    to: cap.tui.select
+  - from: cap.cli.dispatch
+    type: depends_on
+    to: cap.tui.select

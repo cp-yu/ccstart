@@ -1,0 +1,24 @@
+schema_version: 1
+ADDED:
+  capabilities:
+    - id: cap.tui.select
+      type: capability
+      intent: 提供内联模糊搜索选择器，支持 vim 键位导航和拼音首字母匹配，用于无参数启动时交互选择 profile。
+  domains:
+    - id: dom.tui
+      type: domain
+      intent: 终端交互界面层，管理 raw mode 事件循环、内联列表渲染和用户输入状态机。
+      status: active
+      boundary: src/tui/ owns terminal raw mode, inline list rendering, key event handling, and filter state machine.
+  relations:
+    - from: dom.tui
+      type: contains
+      to: cap.tui.select
+    - from: cap.cli.dispatch
+      type: depends_on
+      to: cap.tui.select
+
+MODIFIED:
+  capabilities:
+    - id: cap.cli.dispatch
+      intent: 解析 ccstart/cxstart 参数并分发命令；无参数时启动 TUI 选择器代替显示帮助信息。

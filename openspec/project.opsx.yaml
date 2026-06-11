@@ -18,13 +18,18 @@ domains:
     status: active
     type: domain
     boundary: src/db/ owns database location, read-only connections, Provider rows, and Claude provider query ordering.
+  - id: dom.tui
+    intent: 终端交互界面层，管理 raw mode 事件循环、内联列表渲染和用户输入状态机。
+    status: active
+    type: domain
+    boundary: src/tui/ owns terminal raw mode, inline list rendering, key event handling, and filter state machine.
 capabilities:
   - id: cap.cache.sync
     intent: 将 provider settings_config 同步到按名称编码的缓存文件，并报告新增、更新、未变和删除状态。
     status: active
     type: capability
   - id: cap.cli.dispatch
-    intent: 解析 ccstart 参数并分发 list、update、completions、run 和默认配置启动路径。
+    intent: 解析 ccstart/cxstart 参数并分发命令；无参数时启动 TUI 选择器代替显示帮助信息。
     status: active
     type: capability
   - id: cap.provider.query
@@ -38,4 +43,7 @@ capabilities:
   - id: cap.codex.completion
     intent: 为 codex 子命令的 channel 参数提供 shell 动态自动补全，候选值从数据库 app_type='codex' 实时查询。
     status: active
+    type: capability
+  - id: cap.tui.select
+    intent: 提供内联模糊搜索选择器，支持 vim 键位导航和拼音首字母匹配，用于无参数启动时交互选择 profile。
     type: capability
