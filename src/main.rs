@@ -2,6 +2,7 @@ mod commands;
 mod config;
 mod db;
 mod error;
+mod tui;
 mod utils;
 
 use clap::{CommandFactory, Parser, Subcommand};
@@ -107,10 +108,19 @@ fn run_cxstart() -> error::AppResult<i32> {
             commands::codex::run(channel, &passthrough)
         }
         None => {
-            eprintln!("用法: cxstart <channel> [args...]");
-            eprintln!("      cxstart list");
-            eprintln!("\n等价于 ccstart codex <channel> [args...]");
-            Ok(0)
+            let db = db::Database::open()?;
+            let names = db.providers().list_names("codex")?;
+
+            if names.is_empty() {
+                eprintln!("错误: 数据库中没有 Codex 渠道");
+                eprintln!("提示: 请先在 cc-switch 中添加 codex 配置");
+                return Ok(1);
+            }
+
+            match tui::select(&names, "选择 Codex 渠道")? {
+                Some(channel) => commands::codex::run(&channel, &[]),
+                None => Ok(0),
+            }
         }
     }
 }
@@ -142,9 +152,19 @@ fn run_app() -> error::AppResult<i32> {
             }
             Some(channel) => commands::codex::run(channel, &args)?,
             None => {
-                Cli::command().print_help().ok();
-                println!();
-                0
+                let db = db::Database::open()?;
+                let names = db.providers().list_names("codex")?;
+
+                if names.is_empty() {
+                    eprintln!("错误: 数据库中没有 Codex 渠道");
+                    eprintln!("提示: 请先在 cc-switch 中添加 codex 配置");
+                    return Ok(1);
+                }
+
+                match tui::select(&names, "选择 Codex 渠道")? {
+                    Some(channel) => commands::codex::run(&channel, &args)?,
+                    None => 0,
+                }
             }
         },
         Some(Commands::Completions { shell }) => {
@@ -157,10 +177,20 @@ fn run_app() -> error::AppResult<i32> {
             if let Some(name) = cli.name {
                 commands::run::run(&name, &cli.args)?
             } else {
-                // 无参数，显示帮助
-                Cli::command().print_help().ok();
-                println!();
-                0
+                // 无参数，启动 TUI 选择器
+                let db = db::Database::open()?;
+                let names = db.providers().list_names("claude")?;
+
+                if names.is_empty() {
+                    eprintln!("错误: 数据库中没有 Claude 配置");
+                    eprintln!("提示: 请先在 cc-switch 中添加配置");
+                    return Ok(1);
+                }
+
+                match tui::select(&names, "选择 Claude 配置")? {
+                    Some(name) => commands::run::run(&name, &[])?,
+                    None => 0,
+                }
             }
         }
     };

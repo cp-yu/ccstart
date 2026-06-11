@@ -13,6 +13,7 @@ pub enum CodexCacheResult {
 }
 
 impl CodexCacheResult {
+    #[allow(dead_code)]
     pub fn path(&self) -> &PathBuf {
         match self {
             Self::Unchanged(p) | Self::Created(p) | Self::Updated(p) => p,
@@ -82,17 +83,15 @@ impl CodexCacheManager {
             if !path.is_file() {
                 continue;
             }
-            if let Some(fname) = path.file_name().and_then(|s| s.to_str()) {
-                if let Some(rest) = fname.strip_prefix("ccstart-") {
-                    if let Some(hash) = rest.strip_suffix(".config.toml") {
-                        if !valid_hashes.contains(hash) {
-                            fs::remove_file(&path).with_context(|| {
-                                format!("删除过期 codex profile 失败: {}", path.display())
-                            })?;
-                            removed.push(fname.to_string());
-                        }
-                    }
-                }
+            if let Some(fname) = path.file_name().and_then(|s| s.to_str())
+                && let Some(rest) = fname.strip_prefix("ccstart-")
+                && let Some(hash) = rest.strip_suffix(".config.toml")
+                && !valid_hashes.contains(hash)
+            {
+                fs::remove_file(&path).with_context(|| {
+                    format!("删除过期 codex profile 失败: {}", path.display())
+                })?;
+                removed.push(fname.to_string());
             }
         }
 
