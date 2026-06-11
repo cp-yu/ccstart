@@ -107,21 +107,24 @@ fn run_cxstart() -> error::AppResult<i32> {
             let passthrough = args[1..].to_vec();
             commands::codex::run(channel, &passthrough)
         }
-        None => {
-            let db = db::Database::open()?;
-            let names = db.providers().list_names("codex")?;
+        None => select_and_run_codex(&[])
+    }
+}
 
-            if names.is_empty() {
-                eprintln!("错误: 数据库中没有 Codex 渠道");
-                eprintln!("提示: 请先在 cc-switch 中添加 codex 配置");
-                return Ok(1);
-            }
+/// 选择 Codex 渠道并运行（TUI 选择器）
+fn select_and_run_codex(args: &[String]) -> error::AppResult<i32> {
+    let db = db::Database::open()?;
+    let names = db.providers().list_names("codex")?;
 
-            match tui::select(&names, "选择 Codex 渠道")? {
-                Some(channel) => commands::codex::run(&channel, &[]),
-                None => Ok(0),
-            }
-        }
+    if names.is_empty() {
+        eprintln!("错误: 数据库中没有 Codex 渠道");
+        eprintln!("提示: 请先在 cc-switch 中添加 codex 配置");
+        return Ok(1);
+    }
+
+    match tui::select(&names, "选择 Codex 渠道")? {
+        Some(channel) => commands::codex::run(&channel, args),
+        None => Ok(0),
     }
 }
 
@@ -151,21 +154,7 @@ fn run_app() -> error::AppResult<i32> {
                 0
             }
             Some(channel) => commands::codex::run(channel, &args)?,
-            None => {
-                let db = db::Database::open()?;
-                let names = db.providers().list_names("codex")?;
-
-                if names.is_empty() {
-                    eprintln!("错误: 数据库中没有 Codex 渠道");
-                    eprintln!("提示: 请先在 cc-switch 中添加 codex 配置");
-                    return Ok(1);
-                }
-
-                match tui::select(&names, "选择 Codex 渠道")? {
-                    Some(channel) => commands::codex::run(&channel, &args)?,
-                    None => 0,
-                }
-            }
+            None => select_and_run_codex(&args)?
         },
         Some(Commands::Completions { shell }) => {
             commands::completions::run(shell)?;
@@ -209,20 +198,20 @@ fn main() {
     }
 }
 
-/// 动态补全：返回配置名称候选（从 SQLite 查询）
-pub fn config_name_completer(current: &OsStr) -> Vec<clap_complete::engine::CompletionCandidate> {
+/// 通用配置名称补全（支持前缀和拼音匹配）
+fn complete_names(prefix: &str, names: &[String]) -> Vec<String> {
+    let lower = prefix.to_lowercase();
     let mut out = Vec::new();
+    let is_ascii_alpha = !lower.is_empty() && lower.bytes().all(|b| b.is_ascii_alphabetic());
 
-    let needle = current.to_string_lossy().to_string();
-    let lower = needle.to_lowercase();
-
-    // 从 SQLite 查询
-    if let Ok(db) = crate::db::Database::open()
-        && let Ok(names) = db.providers().list_names("claude")
-    {
-        for name in names {
-            if lower.is_empty() || name.to_lowercase().starts_with(&lower) {
-                out.push(clap_complete::engine::CompletionCandidate::new(name));
+    for name in names {
+        let name_lower = name.to_lowercase();
+        if lower.is_empty() || name_lower.starts_with(&lower) {
+            out.push(name.clone());
+        } else if is_ascii_alpha {
+            let initials = crate::utils::pinyin::pinyin_initials(name);
+            if initials.starts_with(&lower) {
+                out.push(name.clone());
             }
         }
     }
@@ -230,27 +219,20 @@ pub fn config_name_completer(current: &OsStr) -> Vec<clap_complete::engine::Comp
     out
 }
 
-/// 补全匹配逻辑：返回匹配前缀的渠道名（含拼音首字母）
-fn complete_channels(prefix: &str, names: &[String]) -> Vec<String> {
-    let lower = prefix.to_lowercase();
-    let mut out = Vec::new();
+/// 动态补全：返回配置名称候选（从 SQLite 查询）
+pub fn config_name_completer(current: &OsStr) -> Vec<clap_complete::engine::CompletionCandidate> {
+    let needle = current.to_string_lossy().to_string();
 
-    for name in names {
-        if lower.is_empty() || name.to_lowercase().starts_with(&lower) {
-            out.push(name.clone());
-        }
+    if let Ok(db) = crate::db::Database::open()
+        && let Ok(names) = db.providers().list_names("claude")
+    {
+        complete_names(&needle, &names)
+            .into_iter()
+            .map(clap_complete::engine::CompletionCandidate::new)
+            .collect()
+    } else {
+        Vec::new()
     }
-
-    if !lower.is_empty() && lower.bytes().all(|b| b.is_ascii_alphabetic()) {
-        for name in names {
-            let initials = crate::utils::pinyin::pinyin_initials(name);
-            if initials.starts_with(&lower) && !out.contains(name) {
-                out.push(name.clone());
-            }
-        }
-    }
-
-    out
 }
 
 /// 动态补全：返回 Codex 渠道候选（从 SQLite 查询，支持拼音首字母前缀）
@@ -260,7 +242,7 @@ pub fn codex_channel_completer(current: &OsStr) -> Vec<clap_complete::engine::Co
     if let Ok(db) = crate::db::Database::open()
         && let Ok(names) = db.providers().list_names("codex")
     {
-        complete_channels(&needle, &names)
+        complete_names(&needle, &names)
             .into_iter()
             .map(clap_complete::engine::CompletionCandidate::new)
             .collect()
@@ -287,7 +269,7 @@ mod tests {
     #[test]
     fn completion_pinyin() {
         let channels = vec!["小丑".into(), "packyapi".into(), "钟阮".into()];
-        let results = complete_channels("xc", &channels);
+        let results = complete_names("xc", &channels);
         assert!(results.contains(&"小丑".to_string()));
         assert!(!results.contains(&"packyapi".to_string()));
     }
@@ -295,7 +277,7 @@ mod tests {
     #[test]
     fn completion_prefix_normal() {
         let channels = vec!["packyapi".into(), "packycode".into(), "小丑".into()];
-        let results = complete_channels("pa", &channels);
+        let results = complete_names("pa", &channels);
         assert!(results.contains(&"packyapi".to_string()));
         assert!(results.contains(&"packycode".to_string()));
         assert!(!results.contains(&"小丑".to_string()));
@@ -304,7 +286,7 @@ mod tests {
     #[test]
     fn completion_empty_returns_all() {
         let channels = vec!["packyapi".into(), "小丑".into()];
-        let results = complete_channels("", &channels);
+        let results = complete_names("", &channels);
         assert_eq!(results.len(), 2);
     }
 }

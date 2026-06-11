@@ -7,17 +7,15 @@ pub fn filter_items<'a>(items: &'a [String], query: &str) -> Vec<&'a String> {
 
     let lower = query.to_lowercase();
     let mut result = Vec::new();
+    let is_ascii_alpha = lower.bytes().all(|b| b.is_ascii_alphabetic());
 
     for item in items {
-        if item.to_lowercase().contains(&lower) {
+        let item_lower = item.to_lowercase();
+        if item_lower.contains(&lower) {
             result.push(item);
-        }
-    }
-
-    if lower.bytes().all(|b| b.is_ascii_alphabetic()) {
-        for item in items {
+        } else if is_ascii_alpha {
             let initials = pinyin_initials(item);
-            if initials.contains(&lower) && !result.contains(&item) {
+            if initials.contains(&lower) {
                 result.push(item);
             }
         }

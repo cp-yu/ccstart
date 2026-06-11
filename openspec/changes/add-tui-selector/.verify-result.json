@@ -14,7 +14,7 @@
       "src/tui/filter.rs",
       "src/tui/mod.rs"
     ],
-    "evidenceFingerprint": "bd97d3d6f27bbc62e9bca6ace4cc7621edb62c8bc61c77ea5c9bfcd991988d38",
+    "evidenceFingerprint": "87e09f83a0194e389c56387a4c140d8051620dd435a13412466d30e5aa545027",
     "evidenceFingerprintEntries": [
       {
         "path": "Cargo.toml",
@@ -30,11 +30,11 @@
       },
       {
         "path": "src/main.rs",
-        "hash": "e7794f6763c5999a6daf0db7505ab7b4ab0faacf1ab4bb41aa2c50ebbfcf9efd"
+        "hash": "4d36351db78913a59b460f72b08989823ed9ac5f16c7f63abb0fad22bf1d0cd9"
       },
       {
         "path": "src/tui/filter.rs",
-        "hash": "b5dc16c304b2ddb5591287a8583eacfd2f9fd8316c54c30d51018cce7bd2bb64"
+        "hash": "a3efba6e872e86c389baa441db2a076b259fb2b025517679936020314d787f4a"
       },
       {
         "path": "src/tui/mod.rs",
@@ -45,8 +45,29 @@
     "gitHeadCommit": "bcff2774098563bb9808e871b519d3338d1ac431"
   },
   "optimization": {
-    "status": "PENDING_VERIFICATION",
-    "attempts": [],
+    "status": "IMPROVED",
+    "attempts": [
+      {
+        "timestamp": "2026-06-11T07:45:18.608Z",
+        "type": "optimization",
+        "status": "OPTIMIZATION_PROPOSED",
+        "summary": "4 optimizations: deduplicate codex TUI selector, consolidate filter loops, unify completion logic",
+        "files": [
+          "src/main.rs",
+          "src/tui/filter.rs"
+        ]
+      },
+      {
+        "timestamp": "2026-06-11T07:54:02.248Z",
+        "type": "verification",
+        "result": "PASS",
+        "behaviorRetryCounter": 1
+      }
+    ],
+    "affectedFileHashes": {
+      "src/main.rs": "e7794f6763c5999a6daf0db7505ab7b4ab0faacf1ab4bb41aa2c50ebbfcf9efd",
+      "src/tui/filter.rs": "b5dc16c304b2ddb5591287a8583eacfd2f9fd8316c54c30d51018cce7bd2bb64"
+    },
     "baseline": {
       "timestamp": "2026-06-11T07:37:56.619Z",
       "result": "PASS",
@@ -93,6 +114,10 @@
         "skippedEvidenceFiles": [],
         "gitHeadCommit": "bcff2774098563bb9808e871b519d3338d1ac431"
       }
+    },
+    "final": {
+      "result": "PASS",
+      "issues": []
     }
   }
 }
