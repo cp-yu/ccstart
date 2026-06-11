@@ -1,5 +1,5 @@
 schema_version: 1
-generated_at: 2026-06-01T09:33:18.896Z
+generated_at: 2026-06-11T08:49:41.289Z
 nodes:
   - id: cap.cache.sync
     refs:

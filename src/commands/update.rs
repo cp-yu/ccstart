@@ -103,12 +103,10 @@ mod tests {
     #[test]
     fn update_syncs_codex() {
         // 测试逻辑需要真实数据库，这里验证代码结构
-        assert!(true);
     }
 
     #[test]
     fn update_cleans_codex() {
         // 测试逻辑需要真实数据库，这里验证代码结构
-        assert!(true);
     }
 }

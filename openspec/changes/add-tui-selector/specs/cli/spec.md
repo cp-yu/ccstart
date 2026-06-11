@@ -1,9 +1,5 @@
-# Spec: cli
+## MODIFIED Requirements
 
-## Purpose
-
-定义 ccstart 的命令行入口、子命令行为和动态补全接口。
-## Requirements
 ### Requirement: Command dispatch
 系统 SHALL 解析 ccstart 参数并将每个支持的命令分发到对应处理器。当无参数调用时，SHALL 启动 TUI 选择器而非显示帮助。
 
@@ -23,12 +19,3 @@
 #### Scenario: ccstart codex 无参数启动 TUI 选择 Codex 渠道
 - **WHEN** 用户运行 `ccstart codex`（无 channel 参数）
 - **THEN** 启动 TUI 选择器展示所有 Codex 渠道，用户选中后使用该渠道启动 codex
-
-### Requirement: Completion candidates
-The system SHALL expose provider names as dynamic completion candidates when the database is available.
-
-#### Scenario: Completion filters by prefix
-- **GIVEN** provider names are available from the database
-- **WHEN** shell completion requests candidates for a partial prefix
-- **THEN** matching provider names are returned as completion candidates
-
