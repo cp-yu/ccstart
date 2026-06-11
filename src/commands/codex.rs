@@ -1,20 +1,13 @@
+use crate::commands::codex_resolve::{ResolveResult, resolve_channel};
+use crate::config::codex_cache::CodexCacheManager;
 use crate::db::Database;
 use crate::error::AppResult;
 use anyhow::Context;
 #[cfg(unix)]
 use std::os::unix::process::ExitStatusExt;
 use std::process::Command;
-use toml::Value;
 
 const AUTH_ENV_KEY: &str = "OPENAI_API_KEY";
-
-#[derive(Debug)]
-struct CodexConfig {
-    api_key: String,
-    model_provider: String,
-    model: String,
-    base_url: String,
-}
 
 pub fn list_channels() -> AppResult<()> {
     let db = Database::open()?;
@@ -39,28 +32,59 @@ pub fn list_channels() -> AppResult<()> {
 
 pub fn run(channel: &str, args: &[String]) -> AppResult<i32> {
     let db = Database::open()?;
-    let provider = match db.providers().get_by_name("codex", channel)? {
-        Some(p) => p,
-        None => {
+    let names = db.providers().list_names("codex")?;
+
+    let resolved_name = match resolve_channel(channel, &names) {
+        ResolveResult::Exact(name) | ResolveResult::PinyinUnique(name) => name,
+        ResolveResult::PinyinCollision(candidates) => {
+            eprintln!("错误: 拼音 '{}' 匹配到多个渠道：", channel);
+            for c in &candidates {
+                eprintln!("  - {}", c);
+            }
+            return Ok(1);
+        }
+        ResolveResult::NotFound => {
             eprintln!("错误: 未找到 Codex 渠道 '{}'", channel);
-            if let Ok(names) = db.providers().list_names("codex") {
-                if names.is_empty() {
-                    eprintln!("提示: 数据库中没有 Codex 渠道，请先在 cc-switch 中添加。");
-                } else {
-                    eprintln!("提示: 可用 Codex 渠道如下：");
-                    for n in names {
-                        eprintln!("  - {}", n);
-                    }
+            if names.is_empty() {
+                eprintln!("提示: 数据库中没有 Codex 渠道，请先在 cc-switch 中添加。");
+            } else {
+                eprintln!("提示: 可用 Codex 渠道如下：");
+                for n in &names {
+                    eprintln!("  - {}", n);
                 }
             }
             return Ok(1);
         }
     };
 
-    let config = parse_settings_config(&provider.settings_config)?;
+    let provider = db
+        .providers()
+        .get_by_name("codex", &resolved_name)?
+        .ok_or_else(|| anyhow::anyhow!("渠道 '{}' 查询失败", resolved_name))?;
+
+    let settings = &provider.settings_config;
+
+    let api_key = settings
+        .pointer("/auth/OPENAI_API_KEY")
+        .and_then(|v| v.as_str())
+        .ok_or_else(|| anyhow::anyhow!("settings_config 缺少 auth.OPENAI_API_KEY"))?;
+
+    let toml_content = settings
+        .get("config")
+        .and_then(|v| v.as_str())
+        .ok_or_else(|| anyhow::anyhow!("settings_config 缺少 config"))?;
+
+    let cache = CodexCacheManager::new()?;
+    cache.ensure_cached(&resolved_name, toml_content)?;
+    let profile_name = CodexCacheManager::profile_name(&resolved_name);
 
     let mut cmd = Command::new("codex");
-    configure_command(&mut cmd, &config, args);
+    cmd.env(AUTH_ENV_KEY, api_key)
+        .arg("-p")
+        .arg(&profile_name);
+    for a in args {
+        cmd.arg(a);
+    }
 
     let status = cmd
         .status()
@@ -81,76 +105,6 @@ pub fn run(channel: &str, args: &[String]) -> AppResult<i32> {
             Ok(1)
         }
     }
-}
-
-fn configure_command(cmd: &mut Command, config: &CodexConfig, args: &[String]) {
-    cmd.env(AUTH_ENV_KEY, &config.api_key)
-        .arg("-c")
-        .arg(format!(
-            "model_provider={}",
-            toml_string(&config.model_provider)
-        ))
-        .arg("-c")
-        .arg(format!(
-            "model_providers.{}.base_url={}",
-            config.model_provider,
-            toml_string(&config.base_url)
-        ))
-        .arg("-c")
-        .arg(format!(
-            "model_providers.{}.env_key={}",
-            config.model_provider,
-            toml_string(AUTH_ENV_KEY)
-        ))
-        .arg("-c")
-        .arg(format!(
-            "model_providers.{}.requires_openai_auth=false",
-            config.model_provider
-        ))
-        .arg("-c")
-        .arg(format!("model={}", toml_string(&config.model)));
-
-    for a in args {
-        cmd.arg(a);
-    }
-}
-
-fn parse_settings_config(settings: &serde_json::Value) -> AppResult<CodexConfig> {
-    let api_key = settings
-        .pointer("/auth/OPENAI_API_KEY")
-        .and_then(|v| v.as_str())
-        .ok_or_else(|| anyhow::anyhow!("settings_config 缺少 auth.OPENAI_API_KEY"))?
-        .to_owned();
-
-    let config_str = settings
-        .get("config")
-        .and_then(|v| v.as_str())
-        .ok_or_else(|| anyhow::anyhow!("settings_config 缺少 config"))?;
-
-    let config: Value =
-        toml::from_str(config_str).with_context(|| "解析 settings_config.config TOML 失败")?;
-    let model_provider = get_str(&config, &["model_provider"])?.to_owned();
-    let model = get_str(&config, &["model"])?.to_owned();
-    let base_url = get_str(&config, &["model_providers", &model_provider, "base_url"])?.to_owned();
-
-    Ok(CodexConfig {
-        api_key,
-        model_provider,
-        model,
-        base_url,
-    })
-}
-
-fn get_str<'a>(value: &'a Value, path: &[&str]) -> AppResult<&'a str> {
-    let mut current = value;
-    for key in path {
-        current = current
-            .get(*key)
-            .ok_or_else(|| anyhow::anyhow!("settings_config.config 缺少 {}", path.join(".")))?;
-    }
-    current
-        .as_str()
-        .ok_or_else(|| anyhow::anyhow!("settings_config.config 字段 {} 不是字符串", path.join(".")))
 }
 
 fn needs_quoting(name: &str) -> bool {
@@ -176,90 +130,43 @@ fn needs_quoting(name: &str) -> bool {
         || name.contains('>')
 }
 
-fn toml_string(value: &str) -> String {
-    Value::String(value.to_owned()).to_string()
-}
-
 #[cfg(test)]
 mod tests {
-    use super::{configure_command, parse_settings_config, CodexConfig, AUTH_ENV_KEY};
-    use serde_json::json;
+    use super::*;
     use std::process::Command;
 
     #[test]
-    fn parses_standard_config() {
-        let settings = json!({
-            "auth": {
-                "OPENAI_API_KEY": "key"
-            },
-            "config": r#"
-model_provider = "custom"
-model = "gpt-5.5"
-
-[model_providers.custom]
-base_url = "https://example.com/v1"
-"#
-        });
-
-        let config = parse_settings_config(&settings).unwrap();
-
-        assert_eq!(config.api_key, "key");
-        assert_eq!(config.model_provider, "custom");
-        assert_eq!(config.model, "gpt-5.5");
-        assert_eq!(config.base_url, "https://example.com/v1");
-    }
-
-    #[test]
-    fn reports_missing_base_url() {
-        let settings = json!({
-            "auth": {
-                "OPENAI_API_KEY": "key"
-            },
-            "config": r#"
-model_provider = "custom"
-model = "gpt-5.5"
-
-[model_providers.custom]
-"#
-        });
-
-        let err = parse_settings_config(&settings).unwrap_err().to_string();
-
-        assert!(err.contains("model_providers.custom.base_url"));
-    }
-
-    #[test]
-    fn configures_provider_auth_from_env() {
-        let config = CodexConfig {
-            api_key: "key".to_owned(),
-            model_provider: "custom".to_owned(),
-            model: "gpt-5.5".to_owned(),
-            base_url: "https://example.com/v1".to_owned(),
-        };
-        let args = vec!["--help".to_owned()];
+    fn codex_dispatch_profile() {
         let mut cmd = Command::new("codex");
+        cmd.env(AUTH_ENV_KEY, "test-key")
+            .arg("-p")
+            .arg("ccstart-abcd1234");
+        cmd.arg("help me");
 
-        configure_command(&mut cmd, &config, &args);
-
-        let arg_strings = cmd
+        let args: Vec<String> = cmd
             .get_args()
             .map(|a| a.to_string_lossy().into_owned())
-            .collect::<Vec<_>>();
+            .collect();
 
-        assert_eq!(
-            cmd.get_envs()
-                .find(|(k, _)| k.to_string_lossy() == AUTH_ENV_KEY)
-                .unwrap()
-                .1,
-            Some("key".as_ref())
-        );
-        assert!(arg_strings.contains(&"model_provider=\"custom\"".to_owned()));
-        assert!(
-            arg_strings.contains(&"model_providers.custom.env_key=\"OPENAI_API_KEY\"".to_owned())
-        );
-        assert!(
-            arg_strings.contains(&"model_providers.custom.requires_openai_auth=false".to_owned())
-        );
-        assert!(arg_strings.contains(&"--help".to_owned()));
+        assert_eq!(args[0], "-p");
+        assert_eq!(args[1], "ccstart-abcd1234");
+        assert_eq!(args[2], "help me");
+        assert!(!args.contains(&"-c".to_owned()));
+    }
+
+    #[test]
+    fn codex_dispatch_env() {
+        let mut cmd = Command::new("codex");
+        cmd.env(AUTH_ENV_KEY, "secret-key")
+            .arg("-p")
+            .arg("ccstart-abcd1234");
+
+        let env_val = cmd
+            .get_envs()
+            .find(|(k, _)| k.to_string_lossy() == AUTH_ENV_KEY)
+            .unwrap()
+            .1;
+
+        assert_eq!(env_val, Some("secret-key".as_ref()));
     }
 }

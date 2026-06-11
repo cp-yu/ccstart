@@ -80,8 +80,47 @@ enum Commands {
 /// 构建 CLI `Command`（供补全/生成脚本等使用）
 pub fn build_cli_command() -> clap::Command { Cli::command() }
 
+/// 检测 argv[0] 是否为 cxstart，是则走 codex 快捷路径
+fn is_cxstart() -> bool {
+    std::env::args_os()
+        .next()
+        .is_some_and(|a| is_cxstart_name(&a))
+}
+
+fn is_cxstart_name(arg0: &std::ffi::OsStr) -> bool {
+    std::path::Path::new(arg0)
+        .file_name()
+        .is_some_and(|name| name == "cxstart" || name == "cxstart.exe")
+}
+
+/// cxstart 快捷入口：将参数视为 codex 子命令
+fn run_cxstart() -> error::AppResult<i32> {
+    let args: Vec<String> = std::env::args().skip(1).collect();
+
+    match args.first().map(|s| s.as_str()) {
+        Some("list") if args.len() == 1 => {
+            commands::codex::list_channels()?;
+            Ok(0)
+        }
+        Some(channel) => {
+            let passthrough = args[1..].to_vec();
+            commands::codex::run(channel, &passthrough)
+        }
+        None => {
+            eprintln!("用法: cxstart <channel> [args...]");
+            eprintln!("      cxstart list");
+            eprintln!("\n等价于 ccstart codex <channel> [args...]");
+            Ok(0)
+        }
+    }
+}
+
 /// 应用主入口：返回进程退出码
 fn run_app() -> error::AppResult<i32> {
+    if is_cxstart() {
+        return run_cxstart();
+    }
+
     // 在最开始拦截 shell 动态补全请求
     CompleteEnv::with_factory(Cli::command).complete();
 
@@ -161,22 +200,81 @@ pub fn config_name_completer(current: &OsStr) -> Vec<clap_complete::engine::Comp
     out
 }
 
-/// 动态补全：返回 Codex 渠道候选（从 SQLite 查询）
-pub fn codex_channel_completer(current: &OsStr) -> Vec<clap_complete::engine::CompletionCandidate> {
+/// 补全匹配逻辑：返回匹配前缀的渠道名（含拼音首字母）
+fn complete_channels(prefix: &str, names: &[String]) -> Vec<String> {
+    let lower = prefix.to_lowercase();
     let mut out = Vec::new();
 
-    let needle = current.to_string_lossy().to_string();
-    let lower = needle.to_lowercase();
+    for name in names {
+        if lower.is_empty() || name.to_lowercase().starts_with(&lower) {
+            out.push(name.clone());
+        }
+    }
 
-    if let Ok(db) = crate::db::Database::open()
-        && let Ok(names) = db.providers().list_names("codex")
-    {
+    if !lower.is_empty() && lower.bytes().all(|b| b.is_ascii_alphabetic()) {
         for name in names {
-            if lower.is_empty() || name.to_lowercase().starts_with(&lower) {
-                out.push(clap_complete::engine::CompletionCandidate::new(name));
+            let initials = crate::utils::pinyin::pinyin_initials(name);
+            if initials.starts_with(&lower) && !out.contains(name) {
+                out.push(name.clone());
             }
         }
     }
 
     out
+}
+
+/// 动态补全：返回 Codex 渠道候选（从 SQLite 查询，支持拼音首字母前缀）
+pub fn codex_channel_completer(current: &OsStr) -> Vec<clap_complete::engine::CompletionCandidate> {
+    let needle = current.to_string_lossy().to_string();
+
+    if let Ok(db) = crate::db::Database::open()
+        && let Ok(names) = db.providers().list_names("codex")
+    {
+        complete_channels(&needle, &names)
+            .into_iter()
+            .map(clap_complete::engine::CompletionCandidate::new)
+            .collect()
+    } else {
+        Vec::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::ffi::OsStr;
+
+    #[test]
+    fn cxstart_routing() {
+        assert!(is_cxstart_name(OsStr::new("cxstart")));
+        assert!(is_cxstart_name(OsStr::new("cxstart.exe")));
+        assert!(is_cxstart_name(OsStr::new("/usr/local/bin/cxstart")));
+        assert!(is_cxstart_name(OsStr::new("./cxstart")));
+        assert!(!is_cxstart_name(OsStr::new("ccstart")));
+        assert!(!is_cxstart_name(OsStr::new("/bin/ccstart")));
+    }
+
+    #[test]
+    fn completion_pinyin() {
+        let channels = vec!["小丑".into(), "packyapi".into(), "钟阮".into()];
+        let results = complete_channels("xc", &channels);
+        assert!(results.contains(&"小丑".to_string()));
+        assert!(!results.contains(&"packyapi".to_string()));
+    }
+
+    #[test]
+    fn completion_prefix_normal() {
+        let channels = vec!["packyapi".into(), "packycode".into(), "小丑".into()];
+        let results = complete_channels("pa", &channels);
+        assert!(results.contains(&"packyapi".to_string()));
+        assert!(results.contains(&"packycode".to_string()));
+        assert!(!results.contains(&"小丑".to_string()));
+    }
+
+    #[test]
+    fn completion_empty_returns_all() {
+        let channels = vec!["packyapi".into(), "小丑".into()];
+        let results = complete_channels("", &channels);
+        assert_eq!(results.len(), 2);
+    }
 }
