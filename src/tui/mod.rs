@@ -35,17 +35,42 @@ fn run_selector(stdout: &mut impl Write, items: &[String], title: &str) -> io::R
     let mut filter_cursor = 0;
     let mut kill_slot = String::new();
     let mut pending_g = false;
+    let mut scroll_offset = 0usize;
 
-    let start_row = cursor::position()?.1;
+    let (_, term_rows) = terminal::size()?;
+    // 2 header lines (title + hint) + 1 for scroll indicator
+    let header_rows = 3u16;
+    let indicator_rows = 1u16;
+    let view_size = ((term_rows.saturating_sub(header_rows + indicator_rows)) as usize).max(3).min(15);
+
+    // 渲染前确保底部有足够空间
+    let needed = header_rows + view_size as u16 + indicator_rows;
+    let pos_row = cursor::position()?.1;
+    let start_row = if pos_row + needed > term_rows {
+        let extra = (pos_row + needed).saturating_sub(term_rows);
+        for _ in 0..extra {
+            queue!(stdout, Print("\n"))?;
+        }
+        stdout.flush()?;
+        pos_row.saturating_sub(extra)
+    } else {
+        pos_row
+    };
 
     loop {
         let filtered: Vec<_> = filter::filter_items(items, &filter_input);
         if cursor_pos >= filtered.len() && !filtered.is_empty() {
             cursor_pos = filtered.len() - 1;
         }
+        // 保持滚动窗口跟随光标
+        if cursor_pos < scroll_offset {
+            scroll_offset = cursor_pos;
+        } else if cursor_pos >= scroll_offset + view_size {
+            scroll_offset = cursor_pos + 1 - view_size;
+        }
 
         queue!(stdout, cursor::MoveTo(0, start_row))?;
-        render(stdout, title, &filtered, cursor_pos, &mode, &filter_input)?;
+        render(stdout, title, &filtered, cursor_pos, scroll_offset, view_size, &mode, &filter_input)?;
         stdout.flush()?;
 
         if let Event::Key(key) = event::read()? {
@@ -159,24 +184,35 @@ fn run_selector(stdout: &mut impl Write, items: &[String], title: &str) -> io::R
     }
 }
 
-fn render(stdout: &mut impl Write, title: &str, items: &[&String], cursor: usize, mode: &Mode, filter: &str) -> io::Result<()> {
-    queue!(stdout, terminal::Clear(ClearType::FromCursorDown))?;
+fn render(stdout: &mut impl Write, title: &str, items: &[&String], cursor: usize, scroll_offset: usize, view_size: usize, mode: &Mode, filter: &str) -> io::Result<()> {
+    queue!(stdout, cursor::MoveToColumn(0), terminal::Clear(ClearType::FromCursorDown))?;
 
     match mode {
         Mode::Normal => {
-            queue!(stdout, Print(format!("{}\n", title)))?;
+            queue!(stdout, Print(title), cursor::MoveToNextLine(1))?;
+            queue!(stdout, Print("j/k:移动 gg/G:首/尾 f:搜索 Enter:选择 Esc:取消"), cursor::MoveToNextLine(2))?;
         }
         Mode::Filter => {
-            queue!(stdout, Print(format!("{} [Filter: {}]\n", title, filter)))?;
+            queue!(stdout, Print(format!("{} [Filter: {}]", title, filter)), cursor::MoveToNextLine(1))?;
+            queue!(stdout, Print("输入搜索 ↑↓:移动 Ctrl-U/K:删除 Esc:退出搜索 Enter:选择"), cursor::MoveToNextLine(2))?;
         }
     }
 
-    for (i, item) in items.iter().take(10).enumerate() {
-        if i == cursor {
-            queue!(stdout, SetForegroundColor(Color::Green), Print("> "), Print(item), ResetColor, Print("\n"))?;
+    let visible = items.iter().skip(scroll_offset).take(view_size);
+    for (i, item) in visible.enumerate() {
+        let abs_idx = scroll_offset + i;
+        if abs_idx == cursor {
+            queue!(stdout, SetForegroundColor(Color::Green), Print(format!("> {}", item)), ResetColor, cursor::MoveToNextLine(1))?;
         } else {
-            queue!(stdout, Print("  "), Print(item), Print("\n"))?;
+            queue!(stdout, Print(format!("  {}", item)), cursor::MoveToNextLine(1))?;
         }
+    }
+
+    // 滚动指示器
+    if items.len() > view_size {
+        queue!(stdout, cursor::MoveToNextLine(1))?;
+        let indicator = format!("[{}/{}]", cursor + 1, items.len());
+        queue!(stdout, Print(indicator))?;
     }
 
     Ok(())
